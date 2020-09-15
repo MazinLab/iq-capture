@@ -39,21 +39,44 @@ void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t
 	}
 }
 
-void iq_capture(resstream_t &resstream, keep_t keep[N_GROUPS], capcount_t capturesize,
-				iqout_t &iqout) {
+void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
+				capcount_t capturesize, ap_uint<2> streamselect, iqout_t &iqout) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=resstream
+#pragma HLS INTERFACE axis register port=ddsstream
+#pragma HLS INTERFACE axis register port=lpstream
 #pragma HLS INTERFACE axis register port=iqout
 #pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
 #pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite register port=streamselect bundle=control
+
 
 	static capcount_t tocapture;
-	resstream_t resin;
+	static ap_uint<2> streamid;
+	resstream_t resin, resin0, resin1, resin2;
 	iqout_t iqtmp;
 	iqkeep_t keepval;
 
-	resin=resstream;
+	resin0=resstream;
+	resin1=ddsstream;
+	resin2=lpstream;
+
+	switch (streamid) {
+		case 0:
+			resin=resin0;
+			break;
+		case 1:
+			resin=resin1;
+			break;
+		case 2:
+			resin=resin2;
+			break;
+		case 3:
+			resin=resin0;
+			break;
+	}
+
 	keepval=keep[resin.user]; //half the width so group goes from 0-511
 	unsigned int n_bytes_keep=keepval*4;
 
@@ -67,6 +90,7 @@ void iq_capture(resstream_t &resstream, keep_t keep[N_GROUPS], capcount_t captur
 		iqout=iqtmp;
 	} else {
 		tocapture=capturesize;
+		streamid=streamselect;
 	}
 }
 

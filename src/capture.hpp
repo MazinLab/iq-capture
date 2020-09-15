@@ -62,5 +62,6 @@ typedef struct phaseout_t {
 
 
 void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t capturesize, phaseout_t &phaseout);
-void iq_capture(resstream_t &resstream, keep_t keep[N_GROUPS], capcount_t capturesize, iqout_t &iqout);
+void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS], capcount_t capturesize, iqout_t &iqout);
+//void iq_capture(resstream_t &resstream, keep_t keep[N_GROUPS], capcount_t capturesize, iqout_t &iqout);
 void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, adcout_t &adcout);
