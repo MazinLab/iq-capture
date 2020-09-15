@@ -74,6 +74,8 @@ void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t captures
 #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=istream
+#pragma HLS DATA_PACK variable=istream
+#pragma HLS DATA_PACK variable=qstream
 #pragma HLS INTERFACE axis register port=qstream
 #pragma HLS INTERFACE axis register port=adcout
 #pragma HLS INTERFACE s_axilite register port=capturesize bundle=control clock=ctrl_clk
@@ -81,6 +83,7 @@ void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t captures
 	static capcount_t tocapture;
 	adcstream_t iin, qin;
 	adcout_t iqtmp;
+#pragma HLS ARRAY_PARTITION variable=iqtmp.data complete
 
 	iin=istream;
 	qin=qstream;
