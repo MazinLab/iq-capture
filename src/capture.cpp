@@ -39,6 +39,17 @@ void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t
 	}
 }
 
+ap_uint<4> bitcount_sa8(keep_t x) {
+#pragma HLS PIPELINE II=1
+	const unsigned char S[3] = {1, 2, 4};
+	const unsigned char B[3] = {0x55, 0x33, 0x0f};
+	unsigned char result = x.to_uchar();
+	result = ((result >> S[0]) & B[0]) + (result & B[0]);
+	result = ((result >> S[1]) & B[1]) + (result & B[1]);
+	result = ((result >> S[2]) & B[2]) + (result & B[2]);
+	return ap_uint<4>(result);
+}
+
 void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
 				capcount_t capturesize, ap_uint<2> streamselect, iqout_t &iqout) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
@@ -54,6 +65,7 @@ void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lps
 
 	static capcount_t tocapture;
 	static ap_uint<2> streamid;
+	static bool capturing=false;
 	resstream_t resin, resin0, resin1, resin2;
 	iqout_t iqtmp;
 	iqkeep_t keepval;
@@ -77,21 +89,30 @@ void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lps
 			break;
 	}
 
-	keepval=keep[resin.user]; //half the width so group goes from 0-511
-	unsigned int n_bytes_keep=keepval*4;
+	keepval=keep[resin.user];
+	unsigned int n_keep=bitcount_sa8(keepval);
 
-	if (tocapture>0 && resin.user==0) {
+	if (tocapture>0 && (resin.user==0 | capturing)) {
+		if (n_keep>=tocapture) {
+			keepval= tocapture==n_keep ? keep_t(keepval): keep_t((2<<tocapture)-1);  //user set a bad keepval so just take the first ones to fill things out
+			tocapture = 0;
+			iqtmp.last=true;
+		} else {
+			tocapture-=n_keep;
+			iqtmp.last=false;
+		}
+
 		for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-		tocapture = n_bytes_keep>tocapture ? capcount_t(0): capcount_t(tocapture-n_bytes_keep);
-		keepval = n_bytes_keep>tocapture ? keep_t(tocapture):keep_t(keepval); //A sloppy truncation of the transfer
-		for (int i=0;i<N_IQ;i++)
-			iqtmp.keep(i,i+4)=keepval[i];
-		iqtmp.last=tocapture==0;
+		for (int i=0;i<N_IQ;i++) iqtmp.keep(i,i+4)=keepval[i];
+
+		capturing=true;
 		iqout=iqtmp;
 	} else {
+		capturing=false;
 		tocapture=capturesize;
 		streamid=streamselect;
 	}
+
 }
 
 void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, adcout_t &adcout) {
