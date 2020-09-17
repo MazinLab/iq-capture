@@ -69,7 +69,7 @@ void loadkeep(group_t i, keep_t keep[], capcount_t tocap, keep_t &keepval, keepc
 	}
 }
 
-void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, ap_uint<2> streamid, resstream_t &resin) {
+void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, streamid_t streamid, resstream_t &resin) {
 #pragma HLS PIPELINE II=1
 	switch (streamid) {
 		case 0:
@@ -87,8 +87,10 @@ void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, ap
 	}
 }
 
+
 void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
-				capcount_t &capturesize, ap_uint<2> streamselect, iqout_t &iqout, bool &complete) {
+				capcount_t capturesize, streamid_t streamid, iqout_t &iqout, bool &complete, bool &start) {
+//#pragma HLS RESOURCE variable=keep core=RAM_T2P_BRAM latency=1
 #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=resstream
@@ -97,77 +99,147 @@ void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lps
 #pragma HLS INTERFACE axis register port=iqout
 #pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
 #pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite register port=streamselect bundle=control
+#pragma HLS INTERFACE s_axilite register port=streamid bundle=control
 #pragma HLS INTERFACE s_axilite register port=complete bundle=control
+#pragma HLS INTERFACE s_axilite register port=start bundle=control
 
 
 	static capcount_t remaining;
 	static group_t group;
-	static keep_t nextkeep=0;
-	static keepcnt_t nextn_keep=0;
-	static ap_uint<2> streamid;
-	static bool capturing=false, capturingn1=false;;
-	resstream_t resin, resin1, resin2, resin3;
+	static keep_t nextkeep=0, keep0=0;
+	static keepcnt_t nextn_keep=0, n_keep0=0;
+	static streamid_t _streamid;
+	static bool capturing=false, _need_to_start=false;
+	resstream_t resin;
 
 	//placing the switch in the function saves ~500LUT
-	resin1=resstream;
-	resin2=ddsstream;
-	resin3=lpstream;
-	selectstream(resin1, resin2, resin3, streamid, resin);
+//	resstream_t  resin1, resin2, resin3
+//	resin1=resstream;
+//	resin2=ddsstream;
+//	resin3=lpstream;
+	selectstream(resstream, ddsstream, lpstream, _streamid, resin);
 
-	if (capturing | ((remaining>0)&&resin.user==0) ){
+	if (start) {
+
+		#ifndef __SYNTHESIS__
+		cout<<"Preparing capture of "<<capturesize<<" for stream "<<streamid.to_uint()<<endl;
+		#endif
+
+		_need_to_start=capturesize>0;  //User cleared complete and set a capture size
+		_streamid=streamid;
+		remaining=capturesize;
+		group=0;
+		loadkeep(0, keep, remaining, nextkeep, nextn_keep);//keep0, n_keep0);
+	}
+	else if ((remaining>0 &!_need_to_start) | (_need_to_start && resin.user==0) ) {
+
+		#ifndef __SYNTHESIS__
+		if (_need_to_start) cout<<"Started capture."<<endl;
+		#endif
 
 		iqout_t iqtmp;
 		keep_t keepval;
 		keepcnt_t n_keep;
 		bool last;
 
-		n_keep=nextn_keep;
-		keepval=nextkeep;
-		last=n_keep==capturesize;
+//		if (_need_to_start){
+//			n_keep=n_keep0;
+//			keepval=keep0;
+//		} else {
+			n_keep=nextn_keep;
+			keepval=nextkeep;
+//		}
 
-#ifndef __SYNTHESIS__
+		last=n_keep==remaining;
+
+		#ifndef __SYNTHESIS__
 		cout<<"Group:"<<group<<" User:"<<resin.user<<" Left:"<<remaining<<endl;
 		cout<<"Keepval: "<<std::bitset<8>(keepval.to_uchar())<<dec<<" (n="<<n_keep.to_uint()<<")\n";
-//		cout<<"Keepvalmem: "<<std::bitset<8>(keep[group])<<" (n="<<(int)bitcount_sa8(keep[group])<<")\n";
-#endif
+		//cout<<"Keepvalmem: "<<std::bitset<8>(keep[group])<<" (n="<<(int)bitcount_sa8(keep[group])<<")\n";
+		#endif
 
+		//Send the data and keep bits out
+		setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
+		setkeep: for (int i=0;i<N_IQ;i++) iqtmp.keep(i*4+3,i*4)=keepval[i] ? 0xf:0;
 		iqtmp.last=last;
-		for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-		for (int i=0;i<N_IQ;i++) iqtmp.keep(i*4+3,i*4)=keepval[i] ? 0xf:0;
 		iqout=iqtmp;
 
-		complete=last;
-		capturing=!last;
+		loadkeep(group+1, keep, remaining-n_keep, nextkeep, nextn_keep);
 
-		loadkeep(group+1, keep, remaining-n_keep, nextkeep, nextn_keep);  //this will be junked if complete
-
-		capturesize-=n_keep;
 		remaining-=n_keep;
 
+		_need_to_start=false;
 		group++;
 
-	} else {
-#ifndef __SYNTHESIS__
-		cout<<"No active capture\n";
-#endif
-
-		capcount_t temp;
-
-		temp=capturesize;
-		remaining=temp;
-		complete=temp==0;
-		group=0;
-
-		streamid=streamselect;
-
-		loadkeep(0, keep, temp, nextkeep, nextn_keep);
 	}
+	#ifndef __SYNTHESIS__
+	else
+		cout<<"No active capture\n";
+	#endif
 
+	start=false;
+	complete=remaining==0;
 
+	#ifndef __SYNTHESIS__
+	cout<<"Exiting core. Start="<<start<<" complete="<<complete<<" remain="<<remaining<<endl;
+	#endif
 
 }
 
+
+void simple_ii_2(resstream_t &resstream, keep_t keep[N_GROUPS],
+				 capcount_t &capturesize, iqout_t &iqout, bool &complete, bool &start) {
+#pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS PIPELINE II=1
+#pragma HLS INTERFACE axis register port=resstream
+#pragma HLS INTERFACE axis register port=iqout
+#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
+#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite register port=complete bundle=control
+#pragma HLS INTERFACE s_axilite register port=start bundle=control
+
+	static capcount_t remaining;
+	static group_t group;
+	static keep_t nextkeep=0, keep0=0;
+	static ap_uint<2> streamid;
+	static bool _need_to_start=false;
+	resstream_t resin;
+
+	resin=resstream;
+
+	if (start) {
+		_need_to_start=capturesize>0;  //User cleared complete and set a capture size
+		remaining=capturesize;
+		group=0;
+		nextkeep=keep[0];
+	}else	if (remaining>0 | (_need_to_start && resin.user==0) ){
+
+		_need_to_start=false;
+
+		iqout_t iqtmp;
+		keep_t keepval;
+		bool last;
+
+		keepval=nextkeep;
+		last=8==remaining;
+
+
+		setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
+		iqtmp.last=last;
+		iqtmp.keep=keepval;
+		iqout=iqtmp;
+
+		nextkeep=keep[group+1];
+
+		remaining-=8;
+
+		group++;
+
+	}
+
+	start=false;
+	complete=remaining>0;
+}
 
 
 void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, adcout_t &adcout) {

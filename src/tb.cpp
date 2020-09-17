@@ -28,7 +28,7 @@ bool drivecore(unsigned int ncall, resstream_t resstream[], resstream_t ddsstrea
 
 	iqout_t iqout[ncall];
 	bool fail=false, done=false, started=false;
-	bool keepmatch, iqmatch, core_done;
+	bool keepmatch, iqmatch, core_done, start=true;
 	keep_t keepval;
 	unsigned int captured=0;
 	capcount_t core_capturesize=capturesize;
@@ -40,13 +40,13 @@ bool drivecore(unsigned int ncall, resstream_t resstream[], resstream_t ddsstrea
 	}
 
 	cout<<"Priming core for first call\n";
-	iq_capture(resstream[0], ddsstream[0], lpstream[0], keep, capturesize, streamselect, iqout[0], core_done);
+	iq_capture(resstream[0], ddsstream[0], lpstream[0], keep, core_capturesize, streamselect, iqout[0], core_done, start);
 	cout<<"Core primed first call. Done="<<core_done<<endl<<endl;
 
 	for (int i=0;i<ncall;i++) {
 
 		cout<<dec<<"call="<<i<<" group="<<resstream[i].user<<","<<ddsstream[i].user<<","<<lpstream[i].user<<endl;
-		iq_capture(resstream[i], ddsstream[i], lpstream[i], keep, core_capturesize, streamselect, iqout[i], core_done);
+		iq_capture(resstream[i], ddsstream[i], lpstream[i], keep, core_capturesize, streamselect, iqout[i], core_done, start);
 
 		switch (streamselect){
 		case 0:
@@ -80,7 +80,7 @@ bool drivecore(unsigned int ncall, resstream_t resstream[], resstream_t ddsstrea
 		for (int j=0;j<N_IQ;j++)
 			captured+=iqout[i].keep[j*4];
 
-		cout<<"Captured "<<dec<<captured<<" of "<<capturesize<<". Core says "<<core_capturesize<<" left\n";
+		cout<<"Captured "<<dec<<captured<<" of "<<capturesize<<endl;//". Core says "<<core_capturesize<<" left\n";
 		cout<<"TKEEP=0x"<<hex<<iqout[i].keep.to_uint()<<dec<<" TLAST="<<iqout[i].last<<" Core done:"<<core_done<<endl;
 
 		if (captured<capturesize) {
@@ -161,11 +161,11 @@ int main (void){
 
 
 	cout<<"Selecting Res\n";
-	fail|=drivecore(4, resstream, ddsstream, lpstream, keep, 5, 0);
+	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 0);
 	cout<<"\n\nSelecting DDS\n\n";
-	fail|=drivecore(4, resstream, ddsstream, lpstream, keep, 5, 1);
+	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 1);
 	cout<<"\n\nSelecting LP\n\n";
-	fail|=drivecore(4, resstream, ddsstream, lpstream, keep, 5, 2);
+	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 2);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
