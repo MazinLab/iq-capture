@@ -8,6 +8,12 @@
  * Phase Stream is 512M*8B ~4 GB/s (4 phase 2 bytes @ 512MHz)
 */
 #include "capture.hpp"
+#ifndef __SYNTHESIS__
+#include <bitset>
+#include <iostream>
+using namespace std;
+#endif
+
 
 void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t capturesize,
 				   phaseout_t &phaseout) {
@@ -39,7 +45,7 @@ void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t
 	}
 }
 
-ap_uint<4> bitcount_sa8(keep_t x) {
+unsigned char bitcount_sa8(keep_t x) {
 #pragma HLS PIPELINE II=1
 	const unsigned char S[3] = {1, 2, 4};
 	const unsigned char B[3] = {0x55, 0x33, 0x0f};
@@ -47,33 +53,24 @@ ap_uint<4> bitcount_sa8(keep_t x) {
 	result = ((result >> S[0]) & B[0]) + (result & B[0]);
 	result = ((result >> S[1]) & B[1]) + (result & B[1]);
 	result = ((result >> S[2]) & B[2]) + (result & B[2]);
-	return ap_uint<4>(result);
+	return result;
 }
 
-void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
-				capcount_t capturesize, ap_uint<2> streamselect, iqout_t &iqout) {
-#pragma HLS INTERFACE ap_ctrl_none port=return
+void loadkeep(group_t i, keep_t keep[], capcount_t tocap, keep_t &keepval, keepcnt_t &nkeep) {
+
+	keep_t tmpkeep=keep[i];
+	keepcnt_t tmpn_keep=bitcount_sa8(tmpkeep);
+	if (tmpn_keep>tocap) {
+		nkeep=tocap;
+		keepval=keep_t((1<<tocap)-1); //user set a bad keepval so just take the first ones to fill things out
+	} else {
+		nkeep=tmpn_keep;
+		keepval=tmpkeep;
+	}
+}
+
+void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, ap_uint<2> streamid, resstream_t &resin) {
 #pragma HLS PIPELINE II=1
-#pragma HLS INTERFACE axis register port=resstream
-#pragma HLS INTERFACE axis register port=ddsstream
-#pragma HLS INTERFACE axis register port=lpstream
-#pragma HLS INTERFACE axis register port=iqout
-#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
-#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite register port=streamselect bundle=control
-
-
-	static capcount_t tocapture;
-	static ap_uint<2> streamid;
-	static bool capturing=false;
-	resstream_t resin, resin0, resin1, resin2;
-	iqout_t iqtmp;
-	iqkeep_t keepval;
-
-	resin0=resstream;
-	resin1=ddsstream;
-	resin2=lpstream;
-
 	switch (streamid) {
 		case 0:
 			resin=resin0;
@@ -88,32 +85,90 @@ void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lps
 			resin=resin0;
 			break;
 	}
+}
 
-	keepval=keep[resin.user];
-	unsigned int n_keep=bitcount_sa8(keepval);
+void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
+				capcount_t &capturesize, ap_uint<2> streamselect, iqout_t &iqout, bool &complete) {
+#pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS PIPELINE II=1
+#pragma HLS INTERFACE axis register port=resstream
+#pragma HLS INTERFACE axis register port=ddsstream
+#pragma HLS INTERFACE axis register port=lpstream
+#pragma HLS INTERFACE axis register port=iqout
+#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
+#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite register port=streamselect bundle=control
+#pragma HLS INTERFACE s_axilite register port=complete bundle=control
 
-	if (tocapture>0 && (resin.user==0 | capturing)) {
-		if (n_keep>=tocapture) {
-			keepval= tocapture==n_keep ? keep_t(keepval): keep_t((2<<tocapture)-1);  //user set a bad keepval so just take the first ones to fill things out
-			tocapture = 0;
-			iqtmp.last=true;
-		} else {
-			tocapture-=n_keep;
-			iqtmp.last=false;
-		}
 
+	static capcount_t remaining;
+	static group_t group;
+	static keep_t nextkeep=0;
+	static keepcnt_t nextn_keep=0;
+	static ap_uint<2> streamid;
+	static bool capturing=false, capturingn1=false;;
+	resstream_t resin, resin1, resin2, resin3;
+
+	//placing the switch in the function saves ~500LUT
+	resin1=resstream;
+	resin2=ddsstream;
+	resin3=lpstream;
+	selectstream(resin1, resin2, resin3, streamid, resin);
+
+	if (capturing | ((remaining>0)&&resin.user==0) ){
+
+		iqout_t iqtmp;
+		keep_t keepval;
+		keepcnt_t n_keep;
+		bool last;
+
+		n_keep=nextn_keep;
+		keepval=nextkeep;
+		last=n_keep==capturesize;
+
+#ifndef __SYNTHESIS__
+		cout<<"Group:"<<group<<" User:"<<resin.user<<" Left:"<<remaining<<endl;
+		cout<<"Keepval: "<<std::bitset<8>(keepval.to_uchar())<<dec<<" (n="<<n_keep.to_uint()<<")\n";
+//		cout<<"Keepvalmem: "<<std::bitset<8>(keep[group])<<" (n="<<(int)bitcount_sa8(keep[group])<<")\n";
+#endif
+
+		iqtmp.last=last;
 		for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-		for (int i=0;i<N_IQ;i++) iqtmp.keep(i,i+4)=keepval[i];
-
-		capturing=true;
+		for (int i=0;i<N_IQ;i++) iqtmp.keep(i*4+3,i*4)=keepval[i] ? 0xf:0;
 		iqout=iqtmp;
+
+		complete=last;
+		capturing=!last;
+
+		loadkeep(group+1, keep, remaining-n_keep, nextkeep, nextn_keep);  //this will be junked if complete
+
+		capturesize-=n_keep;
+		remaining-=n_keep;
+
+		group++;
+
 	} else {
-		capturing=false;
-		tocapture=capturesize;
+#ifndef __SYNTHESIS__
+		cout<<"No active capture\n";
+#endif
+
+		capcount_t temp;
+
+		temp=capturesize;
+		remaining=temp;
+		complete=temp==0;
+		group=0;
+
 		streamid=streamselect;
+
+		loadkeep(0, keep, temp, nextkeep, nextn_keep);
 	}
 
+
+
 }
+
+
 
 void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, adcout_t &adcout) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
