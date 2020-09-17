@@ -88,18 +88,18 @@ void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, st
 
 void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
 				capcount_t capturesize, streamid_t streamid, iqout_t &iqout, bool &complete, bool &start) {
-//#pragma HLS INTERFACE ap_ctrl_none port=return
-#pragma HLS INTERFACE s_axilite port=return
+#pragma HLS INTERFACE ap_ctrl_none port=return
+//#pragma HLS INTERFACE s_axilite port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=resstream
 #pragma HLS INTERFACE axis register port=ddsstream
 #pragma HLS INTERFACE axis register port=lpstream
 #pragma HLS INTERFACE axis register port=iqout
-#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
-#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite register port=streamid bundle=control
-#pragma HLS INTERFACE s_axilite register port=complete bundle=control
-#pragma HLS INTERFACE s_axilite register port=start bundle=control
+#pragma HLS INTERFACE s_axilite register port=keep bundle=control
+//#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+//#pragma HLS INTERFACE s_axilite register port=streamid bundle=control
+//#pragma HLS INTERFACE s_axilite register port=complete bundle=control
+//#pragma HLS INTERFACE s_axilite register port=start bundle=control
 
 
 	static capcount_t remaining=0;
