@@ -23,7 +23,7 @@ typedef ap_uint<N_IQ*4> iqkeep_t;
 typedef ap_uint<16> sample_t;
 typedef ap_uint<16> phase_t;
 typedef ap_uint<N_PHASE*2> phasekeep_t;
-typedef ap_uint<27> capcount_t;
+typedef ap_uint<32> capcount_t;  //27min
 typedef ap_uint<4> keepcnt_t;
 typedef ap_uint<3> streamid_t;
 typedef ap_uint<256> uint256_t;
@@ -39,25 +39,26 @@ typedef struct resstream_t {
 } resstream_t;
 
 typedef struct phasestream_t {
-	phase_t data[N_PHASE];
+	sample_t data[N_PHASE];
 	phasegroup_t user;
 	bool last;
 } phasestream_t;
 
-typedef struct iqout2_t {
+typedef struct iqout_t {
 	sample_t data[N_IQ*2];
 	streamid_t id;
 	bool last;
-} iqout2_t;
+} iqout_t;
 
 typedef struct phaseout_t {
-	phase_t data[N_PHASE];
+	sample_t data[N_PHASE];
 	streamid_t id;
 	bool last;
 } phaseout_t;
 
 unsigned char bitcount_sa8(keep_t x);
-void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t capturesize, phaseout_t &phaseout);
-void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, uint256_t keep,
-				capcount_t capturesize, streamid_t streamid, iqout2_t &iqout, bool config);
-void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, iqout2_t &adcout);
+void phase_capture(phasestream_t &phasestream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, bool config,
+				   phaseout_t &phaseout);
+void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, bool config,
+				iqout_t &iqout);
+void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, bool config, iqout_t &adcout);

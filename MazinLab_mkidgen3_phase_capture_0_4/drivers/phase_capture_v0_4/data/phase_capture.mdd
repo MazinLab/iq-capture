@@ -1,0 +1,16 @@
+# ==============================================================
+# Vivado(TM) HLS - High-Level Synthesis from C, C++ and SystemC v2019.2.1 (64-bit)
+# Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+# ==============================================================
+OPTION psf_version = 2.1;
+
+BEGIN driver phase_capture
+
+ OPTION supported_peripherals = (phase_capture_v0_4 );
+ OPTION driver_state = ACTIVE;
+ OPTION copyfiles = all;
+ OPTION name = phase_capture;
+ OPTION version = 0.4;
+
+END driver
+
