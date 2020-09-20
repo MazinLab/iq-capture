@@ -15,230 +15,109 @@ using namespace std;
 #endif
 
 
-void phase_capture(phasestream_t &phasestream, keep_t keep[N_GROUPS], capcount_t capturesize,
-				   phaseout_t &phaseout) {
+void phase_capture(phasestream_t &phasestream, const streamid_t streamid, uint256_t keep, capcount_t capturesize, bool configure, phaseout_t &phaseout) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=phasestream
 #pragma HLS INTERFACE axis register port=phaseout
-#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
-#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=keep bundle=control clock=ctrl_clk
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE ap_stable port=streamid
 
-	static capcount_t tocapture;
+	static capcount_t _remaining=0;
+	static bool _aligned=false;
 	phasestream_t phasein;
 	phaseout_t phasetmp;
-	iqkeep_t keepval;
 
 	phasein=phasestream;
-	keepval=keep[phasein.user/2]; //half the width so group goes from 0-511
-	keepval = phasein.user % 2 ? keep_t(keepval>4) : keep_t(keepval&0xf);
 
-	if (tocapture>0 && phasein.user==0) {
-		for (int i=0;i<N_PHASE;i++)
-			phasetmp.data[i]=phasein.data[i];
-		tocapture= keepval>tocapture ? capcount_t(0): capcount_t(tocapture-keepval);
-		phasetmp.keep = keepval>tocapture ? phasekeep_t(tocapture):phasekeep_t(keepval); //A sloppy truncation of the transfer
-		phasetmp.last=tocapture==0;
-		phaseout=phasetmp;
+	setdata: for (int i=0;i<N_PHASE;i++) phasetmp.data[i]=phasein.data[i];
+	phasetmp.id=streamid;
+	phasetmp.last=_remaining==1;
+
+	if (configure) {
+		_remaining=capturesize;
+		_aligned=false;
+		#ifndef __SYNTHESIS__
+			cout<<"Configured core"<<endl;
+		#endif
 	} else {
-		tocapture=capturesize;
-	}
-}
 
-unsigned char bitcount_sa8(keep_t x) {
-#pragma HLS PIPELINE II=1
-	const unsigned char S[3] = {1, 2, 4};
-	const unsigned char B[3] = {0x55, 0x33, 0x0f};
-	unsigned char result = x.to_uchar();
-	result = ((result >> S[0]) & B[0]) + (result & B[0]);
-	result = ((result >> S[1]) & B[1]) + (result & B[1]);
-	result = ((result >> S[2]) & B[2]) + (result & B[2]);
-	return result;
-}
-
-void parsekeep(keep_t userkeepval, capcount_t tocap, keep_t &keepval, keepcnt_t &nkeep) {
-	keepcnt_t tmpn_keep=bitcount_sa8(userkeepval);
-	if (tmpn_keep<tocap) {
-		nkeep=tmpn_keep;
-		keepval=userkeepval;
-	} else {
-		nkeep=tocap;
-		keepval=keep_t((1<<tocap)-1); //user set a bad keepval so just take the first ones to fill things out
-	}
-}
-
-void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, streamid_t streamid, resstream_t &resin) {
-#pragma HLS PIPELINE II=1
-	switch (streamid) {
-		case 0:
-			resin=resin0;
-			break;
-		case 1:
-			resin=resin1;
-			break;
-		case 2:
-			resin=resin2;
-			break;
-		case 3:
-			resin=resin0;
-			break;
-	}
-}
-
-
-void iq_capture(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, keep_t keep[N_GROUPS],
-				capcount_t capturesize, streamid_t streamid, iqout_t &iqout, bool &complete, bool &start) {
-#pragma HLS INTERFACE ap_ctrl_none port=return
-//#pragma HLS INTERFACE s_axilite port=return
-#pragma HLS PIPELINE II=1
-#pragma HLS INTERFACE axis register port=resstream
-#pragma HLS INTERFACE axis register port=ddsstream
-#pragma HLS INTERFACE axis register port=lpstream
-#pragma HLS INTERFACE axis register port=iqout
-#pragma HLS INTERFACE s_axilite register port=keep bundle=control
-//#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
-//#pragma HLS INTERFACE s_axilite register port=streamid bundle=control
-//#pragma HLS INTERFACE s_axilite register port=complete bundle=control
-//#pragma HLS INTERFACE s_axilite register port=start bundle=control
-
-
-	static capcount_t remaining=0;
-	static group_t group;
-	static keep_t nextkeep=0, keep0=0;
-	static keepcnt_t nextn_keep=0, n_keep0=0;
-	static streamid_t _streamid;
-	static bool capturing=false, _need_to_start=false;
-	resstream_t resin;
-	keepcnt_t n_keep;
-
-	//placing the switch in the function saves ~500LUTZ
-	selectstream(resstream, ddsstream, lpstream, _streamid, resin);
-
-	if (start) {
+		_aligned=_aligned || phasein.user==0;
 
 		#ifndef __SYNTHESIS__
-		cout<<"Preparing capture of "<<capturesize<<" for stream "<<streamid.to_uint()<<endl;
+			cout<<"Capture "<<capturesize<<" groups from stream "<<streamid.to_uint()<<" user="<<phasein.user.to_uint()<<endl;
+			cout<<"Aligned "<<_aligned<<". Remaining "<<_remaining<<" Keep this: "<<keep[phasein.user].to_bool()<<endl;
 		#endif
 
-		_need_to_start=capturesize>0;  //User cleared complete and set a capture size
-		_streamid=streamid;
-		remaining=capturesize;
-		group=0;
-		n_keep=0;
-		parsekeep(keep[0], remaining, keep0, n_keep0);
-	}
-	else if ((remaining>0 &!_need_to_start) | (_need_to_start && resin.user==0) ) {
+		if (_remaining>0 && _aligned && keep[phasein.user]) {
+			#ifndef __SYNTHESIS__
+				cout<<"Sending data";
+				if (phasetmp.last) cout<<" with TLAST";
+				cout<<endl;
+			#endif
 
-		#ifndef __SYNTHESIS__
-		if (_need_to_start) cout<<"Started capture."<<endl;
-		#endif
-
-		iqout_t iqtmp;
-		keep_t keepval;
-
-		bool last;
-
-		if (_need_to_start){
-			n_keep=n_keep0;
-			keepval=keep0;
-		} else {
-			n_keep=nextn_keep;
-			keepval=nextkeep;
+			phaseout=phasetmp;
+			_remaining--;
 		}
-
-		last=n_keep==remaining;
-
-		#ifndef __SYNTHESIS__
-		cout<<"Group:"<<group<<" User:"<<resin.user<<" Left:"<<remaining<<endl;
-		cout<<"Keepval: "<<std::bitset<8>(keepval.to_uchar())<<dec<<" (n="<<n_keep.to_uint()<<")\n";
-		//cout<<"Keepvalmem: "<<std::bitset<8>(keep[group])<<" (n="<<(int)bitcount_sa8(keep[group])<<")\n";
-		#endif
-
-		//Send the data and keep bits out
-		setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-		setkeep: for (int i=0;i<N_IQ;i++) iqtmp.keep(i*4+3,i*4)=keepval[i] ? 0xf:0;
-		iqtmp.last=last;
-		iqout=iqtmp;
-
-		_need_to_start=false;
-
-		parsekeep(keep[group+1], remaining-n_keep, nextkeep, nextn_keep);
-//		group++;
 	}
-	else {
-	#ifndef __SYNTHESIS__
-		cout<<"No active capture\n";
-	#endif
-	}
-	group= _need_to_start ? group_t(0) : group_t(group+1);
-
-	remaining-=n_keep;
-	start=false;
-	complete=remaining==0;
-
-	#ifndef __SYNTHESIS__
-	cout<<"Exiting core. Start="<<start<<" complete="<<complete<<" remain="<<remaining<<endl;
-	#endif
-
 }
 
 
-void simple_ii_2(resstream_t &resstream, keep_t keep[N_GROUPS],
-				 capcount_t &capturesize, iqout_t &iqout, bool &complete, bool &start) {
+
+void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, iqout2_t &iqout, bool configure) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
+//#pragma HLS INTERFACE s_axilite port=return bundle=control
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=resstream
 #pragma HLS INTERFACE axis register port=iqout
-#pragma HLS INTERFACE s_axilite register port=keep bundle=control clock=ctrl_clk
-#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite register port=complete bundle=control
-#pragma HLS INTERFACE s_axilite register port=start bundle=control
+#pragma HLS INTERFACE s_axilite port=keep bundle=control
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE ap_stable port=streamid
+#pragma HLS INTERFACE s_axilite port=configure bundle=control
 
-	static capcount_t remaining;
-	static group_t group;
-	static keep_t nextkeep=0, keep0=0;
-	static ap_uint<2> streamid;
-	static bool _need_to_start=false;
+
+	static capcount_t _remaining=0;
+	static bool _aligned=false;
 	resstream_t resin;
+	iqout2_t iqtmp;
 
 	resin=resstream;
 
-	if (start) {
-		_need_to_start=capturesize>0;  //User cleared complete and set a capture size
-		remaining=capturesize;
-		group=0;
-		nextkeep=keep[0];
-	}else	if (remaining>0 | (_need_to_start && resin.user==0) ){
+	setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
+	iqtmp.id=streamid;
+	iqtmp.last=_remaining==1;
 
-		_need_to_start=false;
+	if (configure) {
+		_remaining=capturesize;
+		_aligned=false;
+		#ifndef __SYNTHESIS__
+			cout<<"Configured core"<<endl;
+		#endif
+	} else {
 
-		iqout_t iqtmp;
-		keep_t keepval;
-		bool last;
+		_aligned=_aligned || resin.user==0;
 
-		keepval=nextkeep;
-		last=8==remaining;
+		#ifndef __SYNTHESIS__
+			cout<<"Capture "<<capturesize<<" groups from stream "<<streamid.to_uint()<<" user="<<resin.user.to_uint()<<endl;
+			cout<<"Aligned "<<_aligned<<". Remaining "<<_remaining<<" Keep this: "<<keep[resin.user].to_bool()<<endl;
+		#endif
 
+		if (_remaining>0 && _aligned && keep[resin.user]) {
+			#ifndef __SYNTHESIS__
+				cout<<"Sending data";
+				if (iqtmp.last) cout<<" with TLAST";
+				cout<<endl;
+			#endif
 
-		setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-		iqtmp.last=last;
-		iqtmp.keep=keepval;
-		iqout=iqtmp;
-
-		nextkeep=keep[group+1];
-
-		remaining-=8;
-
-		group++;
-
+			iqout=iqtmp;
+			_remaining--;
+		}
 	}
 
-	start=false;
-	complete=remaining>0;
 }
 
-
-void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, adcout_t &adcout) {
+void adc_capture(adcstream_t &istream, adcstream_t &qstream, bool configure, capcount_t capturesize, iqout2_t &adcout) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
 #pragma HLS PIPELINE II=1
 #pragma HLS INTERFACE axis register port=istream
@@ -246,26 +125,162 @@ void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t captures
 #pragma HLS DATA_PACK variable=qstream
 #pragma HLS INTERFACE axis register port=qstream
 #pragma HLS INTERFACE axis register port=adcout
-#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control clock=ctrl_clk
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control //clock=control_clk
+#pragma HLS INTERFACE s_axilite port=configure bundle=control //clock=control_clk
 
-	static capcount_t tocapture;
+
+	static capcount_t _remaining;
 	adcstream_t iin, qin;
-	adcout_t iqtmp;
-#pragma HLS ARRAY_PARTITION variable=iqtmp.data complete
+	iqout2_t iqtmp;
 
 	iin=istream;
 	qin=qstream;
 
-	if (tocapture>0) {
-		for (int i=0;i<N_IQ;i++){
-			iqtmp.data[2*i]=iin.data[i];
-			iqtmp.data[2*i+1]=qin.data[i];
-		}
-		tocapture=tocapture<4*N_IQ ? capcount_t(0): capcount_t(tocapture-4*N_IQ);
-		iqtmp.last=tocapture==0;
-		adcout=iqtmp;
+	for (int i=0;i<N_IQ;i++){
+		iqtmp.data[2*i]=iin.data[i];
+		iqtmp.data[2*i+1]=qin.data[i];
+	}
+	iqtmp.id=0;
+	iqtmp.last=_remaining==1;
+
+
+	if (configure) {
+		_remaining=capturesize;
+		#ifndef __SYNTHESIS__
+			cout<<"Configured core"<<endl;
+		#endif
 	} else {
-		tocapture=capturesize;
+
+		#ifndef __SYNTHESIS__
+			cout<<"Capture "<<capturesize<<" groups from stream 0. Remaining "<<_remaining<<endl;
+		#endif
+
+		if (_remaining>0) {
+			#ifndef __SYNTHESIS__
+				cout<<"Sending data";
+				if (iqtmp.last) cout<<" with TLAST";
+				cout<<endl;
+			#endif
+
+			adcout=iqtmp;
+			_remaining--;
+		}
 	}
 }
+
+
+//void selectstream(resstream_t resin0, resstream_t resin1, resstream_t resin2, streamid_t streamid, resstream_t &resin) {
+//#pragma HLS PIPELINE II=1
+//	switch (streamid) {
+//		case 0:
+//			resin=resin0;
+//			break;
+//		case 1:
+//			resin=resin1;
+//			break;
+//		case 2:
+//			resin=resin2;
+//			break;
+//		case 3:
+//			resin=resin0;
+//			break;
+//	}
+//}
+
+
+//void capture_control(capcount_t capturesize, streamid_t streamid, bool &complete, bool &start,
+//					 bool &start_out, bool complete_in, capcount_t &capturesize_out, streamid_t &streamid_out){
+//#pragma HLS INTERFACE s_axilite register port=capturesize bundle=control
+//#pragma HLS INTERFACE s_axilite register port=streamid bundle=control
+//#pragma HLS INTERFACE s_axilite register port=complete bundle=control
+//#pragma HLS INTERFACE s_axilite register port=start bundle=control
+//
+//	streamid_out=streamid;
+//	capturesize_out=capturesize;
+//	start_out=start;
+//
+//	complete=complete_in;
+//	start=false;
+//}
+//
+//void keep_tag(resstream_t &resstream, keep_t keep[N_GROUPS], const streamid_t streamid, iqout_t &iqout) {
+//#pragma HLS INTERFACE ap_ctrl_none port=return
+////#pragma HLS INTERFACE s_axilite port=return
+//#pragma HLS PIPELINE II=1
+//#pragma HLS INTERFACE axis register port=resstream
+//#pragma HLS INTERFACE axis register port=iqout
+//#pragma HLS INTERFACE s_axilite register port=keep
+//
+//	iqout_t iqtmp;
+//	resstream_t resin=resstream;
+//	keep_t keepval=keep[resin.user];
+//	//Send the data and keep bits out
+//	setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
+//	setkeep: for (int i=0;i<N_IQ;i++) iqtmp.keep(i*4+3,i*4)=keepval[i] ? 0xf:0;
+//	iqtmp.id=streamid;
+//	iqtmp.last=resin.last;
+//	iqout=iqtmp;
+//}
+
+
+
+
+
+//
+//void iq_capture_group(resstream_t &resstream, resstream_t &ddsstream, resstream_t &lpstream, uint256_t keep,
+//				capcount_t capturesize, streamid_t streamid, iqout2_t &iqout, bool configure) {
+////#pragma HLS INTERFACE ap_ctrl_none port=return
+//#pragma HLS INTERFACE s_axilite port=return bundle=control
+//#pragma HLS PIPELINE II=1
+//#pragma HLS INTERFACE axis register port=resstream
+//#pragma HLS INTERFACE axis register port=ddsstream
+//#pragma HLS INTERFACE axis register port=lpstream
+//#pragma HLS INTERFACE axis register port=iqout
+//#pragma HLS INTERFACE s_axilite  port=keep bundle=control
+//#pragma HLS INTERFACE s_axilite  port=capturesize bundle=control  //Uncommenting this makes it fail the II
+//#pragma HLS INTERFACE s_axilite  port=streamid bundle=control
+//#pragma HLS INTERFACE s_axilite  port=configure bundle=control
+//
+//	static uint256_t _keep;
+//	static capcount_t _remaining=0;
+//	static bool _aligned, _configure=true;
+//	resstream_t resin;
+//	iqout2_t iqtmp;
+//
+//	//placing the switch in the function saves ~500LUT
+//	selectstream(resstream, ddsstream, lpstream, streamid, resin);
+//
+//	setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
+//	iqtmp.id=streamid;
+//
+//	if (configure) {
+//		_remaining=capturesize;
+//		_aligned=false;
+//		_keep=keep;
+//		#ifndef __SYNTHESIS__
+//		cout<<"Configured core"<<endl;
+//		#endif
+//	} else {
+//		iqtmp.last=_remaining==1;
+//
+//		_aligned=_aligned || resin.user==0;
+//
+//		#ifndef __SYNTHESIS__
+//		cout<<"Capture "<<capturesize<<" groups from stream "<<streamid.to_uint()<<" user="<<resin.user.to_uint()<<endl;
+//		cout<<"Aligned "<<_aligned<<". Remaining "<<_remaining<<" Keep this: "<<_keep[resin.user].to_bool()<<endl;
+//		#endif
+//
+//		if (_remaining>0 && _aligned && _keep[resin.user]) {
+//			#ifndef __SYNTHESIS__
+//			cout<<"Sending data";
+//			if (iqtmp.last) cout<<" with TLAST";
+//			cout<<endl;
+//			#endif
+//
+//			iqout=iqtmp;
+//			_remaining--;
+//		}
+//	}
+//
+//}
 

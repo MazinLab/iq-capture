@@ -23,100 +23,179 @@ bool compareiqkeep(iqkeep_t keep, keep_t keepval) {
 	return ret;
 }
 
-bool drivecore(unsigned int ncall, resstream_t resstream[], resstream_t ddsstream[], resstream_t lpstream[],
-		keep_t keep[], capcount_t capturesize, ap_uint<2> streamselect) {
+bool drivecore_group(unsigned int ncall, resstream_t resstream[], resstream_t ddsstream[], resstream_t lpstream[],
+					 keep_t keepin[], capcount_t capturesize, ap_uint<2> streamselect) {
 
-	iqout_t iqout[ncall];
-	bool fail=false, done=false, started=false;
-	bool keepmatch, iqmatch, core_done, start=true;
-	keep_t keepval;
+	iqout2_t iqout[ncall];
+	bool fail=false, done=false, started=false, config=true;
+	bool keepmatch, iqmatch, core_done, start=true, keepval;
+	uint256_t keep;
 	unsigned int captured=0;
 	capcount_t core_capturesize=capturesize;
+
+	for (int i=0;i<N_GROUPS; i++) keep[i]=i%2==0;
 
 	for (int i=0;i<ncall;i++){
 		for (int j=0;j<2*N_IQ;j++) iqout[i].data[j]=0;
 		iqout[i].last=0;
-		iqout[i].keep=0;
+		iqout[i].id=0;
 	}
 
-	cout<<"Priming core for first call\n";
-	iq_capture(resstream[0], ddsstream[0], lpstream[0], keep, core_capturesize, streamselect, iqout[0], core_done, start);
-	cout<<"Core primed first call. Done="<<core_done<<endl<<endl;
-
+	iq_capture_group(resstream[0], ddsstream[0], lpstream[0], keep, core_capturesize, streamselect, iqout[0], config);
 	for (int i=0;i<ncall;i++) {
 
 		cout<<dec<<"call="<<i<<" group="<<resstream[i].user<<","<<ddsstream[i].user<<","<<lpstream[i].user<<endl;
-		iq_capture(resstream[i], ddsstream[i], lpstream[i], keep, core_capturesize, streamselect, iqout[i], core_done, start);
+		iq_capture_group(resstream[i], ddsstream[i], lpstream[i], keep, core_capturesize, streamselect, iqout[i], false);
 
 		switch (streamselect){
 		case 0:
 			keepval=keep[resstream[i].user];
 			started|=resstream[i].user==0;
 			iqmatch=compareiq(resstream[i].data, iqout[i].data);
+			started|=resstream[i].user==0;
 			break;
 		case 1:
 			keepval=keep[ddsstream[i].user];
 			started|=ddsstream[i].user==0;
 			iqmatch=compareiq(ddsstream[i].data, iqout[i].data);
+			started|=ddsstream[i].user==0;
 			break;
 		case 2:
 			keepval=keep[lpstream[i].user];
 			started|=lpstream[i].user==0;
 			iqmatch=compareiq(lpstream[i].data, iqout[i].data);
+			started|=lpstream[i].user==0;
 			break;
 		default:
 			break;
 		}
 
-		if (bitcount_sa8(keepval)>capturesize-captured) {
-			int foo=capturesize==captured ? 0: (1<<(capturesize-captured)-1);
-			//cout<<"Clipping keep in TB as have "<<dec<<captured<<"/"<<capturesize;
-			//cout<<" new keep:"<<hex<<foo<<dec<<endl;
-			keepval=keep_t(foo);
+		keepval*=started;
+		if (keepval & !iqmatch & captured<capturesize) {
+			fail|=true;
+			cout<<"keep and no IQ match\n";
+		}
+		if (iqmatch & !keepval) {
+			fail|=true;
+			cout<<"IQ matches and keep not set\n";
 		}
 
-		keepmatch=compareiqkeep(iqout[i].keep, keepval);
+		captured+=keepval;
 
-		for (int j=0;j<N_IQ;j++)
-			captured+=iqout[i].keep[j*4];
-
-		cout<<"Captured "<<dec<<captured<<" of "<<capturesize<<endl;//". Core says "<<core_capturesize<<" left\n";
-		cout<<"TKEEP=0x"<<hex<<iqout[i].keep.to_uint()<<dec<<" TLAST="<<iqout[i].last<<" Core done:"<<core_done<<endl;
-
-		if (captured<capturesize) {
-			if (!started) {
-				if (iqout[i].last | iqout[i].keep!=0 | core_done) cout<<"Pre-start data\n";
-			} else {
-				fail|=!(keepmatch | iqmatch) | core_done;
-				if (!keepmatch) cout<<"Keep mismatch\n";
-				if (!iqmatch) cout<<"IQ mismatch\n";
-				if (iqout[i].last) cout<<"Premature TLAST\n";
-				if (core_done) cout<<"Premature core done\n";
-			}
-		} else if (captured==capturesize) {
-			if (!core_done) {
-				cout<<"Core not reporting done\n";
-				fail=true;
-			}
-			if (done) {
-				fail|=(iqout[i].last | iqout[i].keep!=0);
-				if (iqout[i].last | iqout[i].keep!=0) cout<<"Extraneous data\n";
-			} else{
-				fail|=!keepmatch | !iqmatch | !iqout[i].last;
-				if (!keepmatch) cout<<"Keep mismatch\n";
-				if (!iqmatch) cout<<"IQ mismatch\n";
-				if (!iqout[i].last) cout<<"TLAST missing\n";
-			}
-			done=true;
-		} else {
-			fail=true;
-			cout<<"Captured more than commanded\n";
+		if (iqout[i].last & captured<capturesize) {
+			fail|=true;
+			cout<<"TLAST early\n";
 		}
+		if (iqout[i].last & captured>capturesize) {
+			fail|=true;
+			cout<<"TLAST late\n";
+		}
+		if (!iqout[i].last & captured==capturesize & !done) {
+			fail|=true;
+			cout<<"TLAST missing\n";
+		}
+		done=captured==capturesize;
+
 
 	}
 
 	return fail;
 }
+//
+//bool drivecore(unsigned int ncall, resstream_t resstream[], resstream_t ddsstream[], resstream_t lpstream[],
+//		keep_t keep[], capcount_t capturesize, ap_uint<2> streamselect) {
+//
+//	iqout_t iqout[ncall];
+//	bool fail=false, done=false, started=false;
+//	bool keepmatch, iqmatch, core_done, start=true;
+//	keep_t keepval;
+//	unsigned int captured=0;
+//	capcount_t core_capturesize=capturesize;
+//
+//	for (int i=0;i<ncall;i++){
+//		for (int j=0;j<2*N_IQ;j++) iqout[i].data[j]=0;
+//		iqout[i].last=0;
+//		iqout[i].keep=0;
+//	}
+//
+//	cout<<"Priming core for first call\n";
+//	iq_capture(resstream[0], ddsstream[0], lpstream[0], keep, core_capturesize, streamselect, iqout[0], core_done, start);
+//	cout<<"Core primed first call. Done="<<core_done<<endl<<endl;
+//
+//	for (int i=0;i<ncall;i++) {
+//
+//		cout<<dec<<"call="<<i<<" group="<<resstream[i].user<<","<<ddsstream[i].user<<","<<lpstream[i].user<<endl;
+//		iq_capture(resstream[i], ddsstream[i], lpstream[i], keep, core_capturesize, streamselect, iqout[i], core_done, start);
+//
+//		switch (streamselect){
+//		case 0:
+//			keepval=keep[resstream[i].user];
+//			started|=resstream[i].user==0;
+//			iqmatch=compareiq(resstream[i].data, iqout[i].data);
+//			break;
+//		case 1:
+//			keepval=keep[ddsstream[i].user];
+//			started|=ddsstream[i].user==0;
+//			iqmatch=compareiq(ddsstream[i].data, iqout[i].data);
+//			break;
+//		case 2:
+//			keepval=keep[lpstream[i].user];
+//			started|=lpstream[i].user==0;
+//			iqmatch=compareiq(lpstream[i].data, iqout[i].data);
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		if (bitcount_sa8(keepval)>capturesize-captured) {
+//			int foo=capturesize==captured ? 0: (1<<(capturesize-captured)-1);
+//			//cout<<"Clipping keep in TB as have "<<dec<<captured<<"/"<<capturesize;
+//			//cout<<" new keep:"<<hex<<foo<<dec<<endl;
+//			keepval=keep_t(foo);
+//		}
+//
+//		keepmatch=compareiqkeep(iqout[i].keep, keepval);
+//
+//		for (int j=0;j<N_IQ;j++)
+//			captured+=iqout[i].keep[j*4];
+//
+//		cout<<"Captured "<<dec<<captured<<" of "<<capturesize<<endl;//". Core says "<<core_capturesize<<" left\n";
+//		cout<<"TKEEP=0x"<<hex<<iqout[i].keep.to_uint()<<dec<<" TLAST="<<iqout[i].last<<" Core done:"<<core_done<<endl;
+//
+//		if (captured<capturesize) {
+//			if (!started) {
+//				if (iqout[i].last | iqout[i].keep!=0 | core_done) cout<<"Pre-start data\n";
+//			} else {
+//				fail|=!(keepmatch | iqmatch) | core_done;
+//				if (!keepmatch) cout<<"Keep mismatch\n";
+//				if (!iqmatch) cout<<"IQ mismatch\n";
+//				if (iqout[i].last) cout<<"Premature TLAST\n";
+//				if (core_done) cout<<"Premature core done\n";
+//			}
+//		} else if (captured==capturesize) {
+//			if (!core_done) {
+//				cout<<"Core not reporting done\n";
+//				fail=true;
+//			}
+//			if (done) {
+//				fail|=(iqout[i].last | iqout[i].keep!=0);
+//				if (iqout[i].last | iqout[i].keep!=0) cout<<"Extraneous data\n";
+//			} else{
+//				fail|=!keepmatch | !iqmatch | !iqout[i].last;
+//				if (!keepmatch) cout<<"Keep mismatch\n";
+//				if (!iqmatch) cout<<"IQ mismatch\n";
+//				if (!iqout[i].last) cout<<"TLAST missing\n";
+//			}
+//			done=true;
+//		} else {
+//			fail=true;
+//			cout<<"Captured more than commanded\n";
+//		}
+//
+//	}
+//
+//	return fail;
+//}
 
 int main (void){
 
@@ -155,17 +234,17 @@ int main (void){
 	}
 	for (int i=0;i<N_GROUPS;i++) {
 		for (int j=0;j<8;j++) {
-			keep[i][j]=j%2;  //keep every other
+			keep[i][j]=(i%2 ==0) && j!=7;  //keep even groups and exclude 8th res
 		}
 	}
 
 
-	cout<<"Selecting Res\n";
-	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 0);
+//	cout<<"Selecting Res\n";
+	fail|=drivecore_group(11, resstream, ddsstream, lpstream, keep, 5, 0);
 	cout<<"\n\nSelecting DDS\n\n";
-	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 1);
+	fail|=drivecore_group(11, resstream, ddsstream, lpstream, keep, 5, 1);
 	cout<<"\n\nSelecting LP\n\n";
-	fail|=drivecore(5, resstream, ddsstream, lpstream, keep, 5, 2);
+	fail|=drivecore_group(11, resstream, ddsstream, lpstream, keep, 5, 2);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
