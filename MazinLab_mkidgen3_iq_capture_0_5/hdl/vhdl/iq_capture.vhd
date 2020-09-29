@@ -21,11 +21,11 @@ port (
     resstream_TREADY : OUT STD_LOGIC;
     resstream_TUSER : IN STD_LOGIC_VECTOR (7 downto 0);
     resstream_TLAST : IN STD_LOGIC;
-    streamid_V : IN STD_LOGIC_VECTOR (2 downto 0);
+    streamid_V : IN STD_LOGIC_VECTOR (3 downto 0);
     iqout_TDATA : OUT STD_LOGIC_VECTOR (255 downto 0);
     iqout_TVALID : OUT STD_LOGIC;
     iqout_TREADY : IN STD_LOGIC;
-    iqout_TID : OUT STD_LOGIC_VECTOR (2 downto 0);
+    iqout_TDEST : OUT STD_LOGIC_VECTOR (3 downto 0);
     iqout_TLAST : OUT STD_LOGIC;
     s_axi_control_AWVALID : IN STD_LOGIC;
     s_axi_control_AWREADY : OUT STD_LOGIC;
@@ -83,11 +83,11 @@ architecture behav of iq_capture is
     signal ap_enable_reg_pp0_iter2 : STD_LOGIC := '0';
     signal configure_read_reg_215 : STD_LOGIC_VECTOR (0 downto 0);
     signal configure_read_reg_215_pp0_iter1_reg : STD_LOGIC_VECTOR (0 downto 0);
-    signal and_ln106_reg_254 : STD_LOGIC_VECTOR (0 downto 0);
+    signal and_ln107_reg_254 : STD_LOGIC_VECTOR (0 downto 0);
     signal p_Result_s_reg_258 : STD_LOGIC_VECTOR (0 downto 0);
     signal ap_enable_reg_pp0_iter3 : STD_LOGIC := '0';
     signal configure_read_reg_215_pp0_iter2_reg : STD_LOGIC_VECTOR (0 downto 0);
-    signal and_ln106_reg_254_pp0_iter2_reg : STD_LOGIC_VECTOR (0 downto 0);
+    signal and_ln107_reg_254_pp0_iter2_reg : STD_LOGIC_VECTOR (0 downto 0);
     signal p_Result_s_reg_258_pp0_iter2_reg : STD_LOGIC_VECTOR (0 downto 0);
     signal configure_read_read_fu_74_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal ap_block_state1_pp0_stage0_iter0 : BOOLEAN;
@@ -109,12 +109,12 @@ architecture behav of iq_capture is
     signal icmp_ln879_reg_244 : STD_LOGIC_VECTOR (0 downto 0);
     signal iqtmp_last_fu_139_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal iqtmp_last_reg_249 : STD_LOGIC_VECTOR (0 downto 0);
-    signal and_ln106_fu_166_p2 : STD_LOGIC_VECTOR (0 downto 0);
+    signal and_ln107_fu_166_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal p_Result_s_fu_186_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal ap_enable_reg_pp0_iter1 : STD_LOGIC := '0';
     signal ap_block_pp0_stage0_subdone : BOOLEAN;
     signal add_ln214_fu_192_p2 : STD_LOGIC_VECTOR (31 downto 0);
-    signal or_ln99_fu_149_p2 : STD_LOGIC_VECTOR (0 downto 0);
+    signal or_ln100_fu_149_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal ap_block_pp0_stage0_01001 : BOOLEAN;
     signal icmp_ln895_fu_160_p2 : STD_LOGIC_VECTOR (0 downto 0);
     signal zext_ln791_fu_172_p1 : STD_LOGIC_VECTOR (255 downto 0);
@@ -140,9 +140,9 @@ architecture behav of iq_capture is
     signal iqout_TVALID_int : STD_LOGIC;
     signal iqout_TREADY_int : STD_LOGIC;
     signal regslice_both_iqout_data_V_U_vld_out : STD_LOGIC;
-    signal regslice_both_iqout_id_V_U_apdone_blk : STD_LOGIC;
-    signal regslice_both_iqout_id_V_U_ack_in_dummy : STD_LOGIC;
-    signal regslice_both_iqout_id_V_U_vld_out : STD_LOGIC;
+    signal regslice_both_iqout_dest_V_U_apdone_blk : STD_LOGIC;
+    signal regslice_both_iqout_dest_V_U_ack_in_dummy : STD_LOGIC;
+    signal regslice_both_iqout_dest_V_U_vld_out : STD_LOGIC;
     signal regslice_both_w1_iqout_last_U_apdone_blk : STD_LOGIC;
     signal iqout_TLAST_int : STD_LOGIC;
     signal regslice_both_w1_iqout_last_U_ack_in_dummy : STD_LOGIC;
@@ -300,19 +300,19 @@ begin
         ack_out => iqout_TREADY,
         apdone_blk => regslice_both_iqout_data_V_U_apdone_blk);
 
-    regslice_both_iqout_id_V_U : component regslice_both
+    regslice_both_iqout_dest_V_U : component regslice_both
     generic map (
-        DataWidth => 3)
+        DataWidth => 4)
     port map (
         ap_clk => ap_clk,
         ap_rst => ap_rst_n_inv,
         data_in => streamid_V,
         vld_in => iqout_TVALID_int,
-        ack_in => regslice_both_iqout_id_V_U_ack_in_dummy,
-        data_out => iqout_TID,
-        vld_out => regslice_both_iqout_id_V_U_vld_out,
+        ack_in => regslice_both_iqout_dest_V_U_ack_in_dummy,
+        data_out => iqout_TDEST,
+        vld_out => regslice_both_iqout_dest_V_U_vld_out,
         ack_out => iqout_TREADY,
-        apdone_blk => regslice_both_iqout_id_V_U_apdone_blk);
+        apdone_blk => regslice_both_iqout_dest_V_U_apdone_blk);
 
     regslice_both_w1_iqout_last_U : component regslice_both_w1
     generic map (
@@ -393,7 +393,7 @@ begin
                 if ((configure_read_reg_215 = ap_const_lv1_1)) then 
                     p_aligned <= ap_const_lv1_0;
                 elsif ((configure_read_reg_215 = ap_const_lv1_0)) then 
-                    p_aligned <= or_ln99_fu_149_p2;
+                    p_aligned <= or_ln100_fu_149_p2;
                 end if;
             end if; 
         end if;
@@ -415,7 +415,7 @@ begin
     begin
         if (ap_clk'event and ap_clk = '1') then
             if (((configure_read_reg_215 = ap_const_lv1_0) and (ap_const_logic_1 = ap_CS_fsm_pp0_stage0) and (ap_const_boolean_0 = ap_block_pp0_stage0_11001))) then
-                and_ln106_reg_254 <= and_ln106_fu_166_p2;
+                and_ln107_reg_254 <= and_ln107_fu_166_p2;
             end if;
         end if;
     end process;
@@ -423,7 +423,7 @@ begin
     begin
         if (ap_clk'event and ap_clk = '1') then
             if ((ap_const_boolean_0 = ap_block_pp0_stage0_11001)) then
-                and_ln106_reg_254_pp0_iter2_reg <= and_ln106_reg_254;
+                and_ln107_reg_254_pp0_iter2_reg <= and_ln107_reg_254;
                 configure_read_reg_215_pp0_iter2_reg <= configure_read_reg_215_pp0_iter1_reg;
                 p_Result_s_reg_258_pp0_iter2_reg <= p_Result_s_reg_258;
             end if;
@@ -455,7 +455,7 @@ begin
     process (ap_clk)
     begin
         if (ap_clk'event and ap_clk = '1') then
-            if (((ap_const_lv1_1 = and_ln106_fu_166_p2) and (configure_read_reg_215 = ap_const_lv1_0) and (ap_const_logic_1 = ap_CS_fsm_pp0_stage0) and (ap_const_boolean_0 = ap_block_pp0_stage0_11001))) then
+            if (((ap_const_lv1_1 = and_ln107_fu_166_p2) and (configure_read_reg_215 = ap_const_lv1_0) and (ap_const_logic_1 = ap_CS_fsm_pp0_stage0) and (ap_const_boolean_0 = ap_block_pp0_stage0_11001))) then
                 p_Result_s_reg_258 <= p_Result_s_fu_186_p2;
             end if;
         end if;
@@ -471,7 +471,7 @@ begin
         end case;
     end process;
     add_ln214_fu_192_p2 <= std_logic_vector(unsigned(p_remaining_V) + unsigned(ap_const_lv32_FFFFFFFF));
-    and_ln106_fu_166_p2 <= (or_ln99_fu_149_p2 and icmp_ln895_fu_160_p2);
+    and_ln107_fu_166_p2 <= (or_ln100_fu_149_p2 and icmp_ln895_fu_160_p2);
     and_ln791_fu_181_p2 <= (shl_ln791_fu_175_p2 and keep_V_read_reg_229);
     ap_CS_fsm_pp0_stage0 <= ap_CS_fsm(0);
         ap_block_pp0_stage0 <= not((ap_const_boolean_1 = ap_const_boolean_1));
@@ -526,9 +526,9 @@ begin
     end process;
 
 
-    ap_condition_178_assign_proc : process(configure_read_reg_215, and_ln106_fu_166_p2, p_Result_s_fu_186_p2)
+    ap_condition_178_assign_proc : process(configure_read_reg_215, and_ln107_fu_166_p2, p_Result_s_fu_186_p2)
     begin
-                ap_condition_178 <= ((ap_const_lv1_1 = and_ln106_fu_166_p2) and (configure_read_reg_215 = ap_const_lv1_0) and (p_Result_s_fu_186_p2 = ap_const_lv1_0));
+                ap_condition_178 <= ((ap_const_lv1_1 = and_ln107_fu_166_p2) and (configure_read_reg_215 = ap_const_lv1_0) and (p_Result_s_fu_186_p2 = ap_const_lv1_0));
     end process;
 
     ap_enable_pp0 <= (ap_idle_pp0 xor ap_const_logic_1);
@@ -543,15 +543,15 @@ begin
     end process;
 
 
-    ap_predicate_op31_write_state3_assign_proc : process(configure_read_reg_215_pp0_iter1_reg, and_ln106_reg_254, p_Result_s_reg_258)
+    ap_predicate_op31_write_state3_assign_proc : process(configure_read_reg_215_pp0_iter1_reg, and_ln107_reg_254, p_Result_s_reg_258)
     begin
-                ap_predicate_op31_write_state3 <= ((ap_const_lv1_1 = and_ln106_reg_254) and (p_Result_s_reg_258 = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter1_reg = ap_const_lv1_0));
+                ap_predicate_op31_write_state3 <= ((ap_const_lv1_1 = and_ln107_reg_254) and (p_Result_s_reg_258 = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter1_reg = ap_const_lv1_0));
     end process;
 
 
-    ap_predicate_op51_write_state4_assign_proc : process(configure_read_reg_215_pp0_iter2_reg, and_ln106_reg_254_pp0_iter2_reg, p_Result_s_reg_258_pp0_iter2_reg)
+    ap_predicate_op51_write_state4_assign_proc : process(configure_read_reg_215_pp0_iter2_reg, and_ln107_reg_254_pp0_iter2_reg, p_Result_s_reg_258_pp0_iter2_reg)
     begin
-                ap_predicate_op51_write_state4 <= ((ap_const_lv1_1 = and_ln106_reg_254_pp0_iter2_reg) and (p_Result_s_reg_258_pp0_iter2_reg = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter2_reg = ap_const_lv1_0));
+                ap_predicate_op51_write_state4 <= ((ap_const_lv1_1 = and_ln107_reg_254_pp0_iter2_reg) and (p_Result_s_reg_258_pp0_iter2_reg = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter2_reg = ap_const_lv1_0));
     end process;
 
     ap_reset_idle_pp0 <= ap_const_logic_0;
@@ -565,9 +565,9 @@ begin
     icmp_ln879_fu_129_p2 <= "1" when (resstream_TUSER_int = ap_const_lv8_0) else "0";
     icmp_ln895_fu_160_p2 <= "0" when (p_remaining_V = ap_const_lv32_0) else "1";
 
-    iqout_TDATA_blk_n_assign_proc : process(ap_block_pp0_stage0, ap_enable_reg_pp0_iter2, configure_read_reg_215_pp0_iter1_reg, and_ln106_reg_254, p_Result_s_reg_258, ap_enable_reg_pp0_iter3, configure_read_reg_215_pp0_iter2_reg, and_ln106_reg_254_pp0_iter2_reg, p_Result_s_reg_258_pp0_iter2_reg, iqout_TREADY_int)
+    iqout_TDATA_blk_n_assign_proc : process(ap_block_pp0_stage0, ap_enable_reg_pp0_iter2, configure_read_reg_215_pp0_iter1_reg, and_ln107_reg_254, p_Result_s_reg_258, ap_enable_reg_pp0_iter3, configure_read_reg_215_pp0_iter2_reg, and_ln107_reg_254_pp0_iter2_reg, p_Result_s_reg_258_pp0_iter2_reg, iqout_TREADY_int)
     begin
-        if ((((ap_const_lv1_1 = and_ln106_reg_254_pp0_iter2_reg) and (ap_const_boolean_0 = ap_block_pp0_stage0) and (p_Result_s_reg_258_pp0_iter2_reg = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter2_reg = ap_const_lv1_0) and (ap_enable_reg_pp0_iter3 = ap_const_logic_1)) or ((ap_const_lv1_1 = and_ln106_reg_254) and (ap_const_boolean_0 = ap_block_pp0_stage0) and (p_Result_s_reg_258 = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter1_reg = ap_const_lv1_0) and (ap_enable_reg_pp0_iter2 = ap_const_logic_1)))) then 
+        if ((((ap_const_lv1_1 = and_ln107_reg_254_pp0_iter2_reg) and (ap_const_boolean_0 = ap_block_pp0_stage0) and (p_Result_s_reg_258_pp0_iter2_reg = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter2_reg = ap_const_lv1_0) and (ap_enable_reg_pp0_iter3 = ap_const_logic_1)) or ((ap_const_lv1_1 = and_ln107_reg_254) and (ap_const_boolean_0 = ap_block_pp0_stage0) and (p_Result_s_reg_258 = ap_const_lv1_0) and (configure_read_reg_215_pp0_iter1_reg = ap_const_lv1_0) and (ap_enable_reg_pp0_iter2 = ap_const_logic_1)))) then 
             iqout_TDATA_blk_n <= iqout_TREADY_int;
         else 
             iqout_TDATA_blk_n <= ap_const_logic_1;
@@ -587,7 +587,7 @@ begin
     end process;
 
     iqtmp_last_fu_139_p2 <= "1" when (p_remaining_V = ap_const_lv32_1) else "0";
-    or_ln99_fu_149_p2 <= (p_aligned or icmp_ln879_reg_244);
+    or_ln100_fu_149_p2 <= (p_aligned or icmp_ln879_reg_244);
     p_Result_s_fu_186_p2 <= "1" when (and_ln791_fu_181_p2 = ap_const_lv256_lc_2) else "0";
 
     resstream_TDATA_blk_n_assign_proc : process(ap_CS_fsm_pp0_stage0, ap_block_pp0_stage0, resstream_TVALID_int)

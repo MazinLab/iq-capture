@@ -41,7 +41,7 @@ bool driveadc_group(unsigned int ncall, adcstream_t istream[], adcstream_t qstre
 	for (int i=0;i<ncall;i++){
 		for (int j=0;j<2*N_IQ;j++) out[i].data[j]=0;
 		out[i].last=0;
-		out[i].id=0;
+		out[i].dest=0;
 	}
 
 	adc_capture(istream[0], qstream[0], core_capturesize, true, out[0]);
@@ -63,7 +63,7 @@ bool driveadc_group(unsigned int ncall, adcstream_t istream[], adcstream_t qstre
 			fail|=true;
 			cout<<"IQ matches and keep not set\n";
 		}
-		if (out[i].id!=0 && keepval && !done){
+		if (out[i].dest!=0 && keepval && !done){
 			fail|=true;
 			cout<<"Streamid mismatch\n";
 		}
@@ -103,7 +103,7 @@ bool drivephase_group(unsigned int ncall, phasestream_t resstream[], capcount_t 
 	for (int i=0;i<ncall;i++){
 		for (int j=0;j<2*N_IQ;j++) out[i].data[j]=0;
 		out[i].last=0;
-		out[i].id=0;
+		out[i].dest=0;
 	}
 
 	phase_capture(resstream[0], keep, core_capturesize, 3, true, out[0]);
@@ -125,7 +125,7 @@ bool drivephase_group(unsigned int ncall, phasestream_t resstream[], capcount_t 
 			fail|=true;
 			cout<<"IQ matches and keep not set\n";
 		}
-		if (out[i].id!=3 && keepval && !done){
+		if (out[i].dest!=3 && keepval && !done){
 			fail|=true;
 			cout<<"Streamid mismatch\n";
 		}
@@ -165,7 +165,7 @@ bool drivecore_group(unsigned int ncall, resstream_t resstream[], capcount_t cap
 	for (int i=0;i<ncall;i++){
 		for (int j=0;j<2*N_IQ;j++) iqout[i].data[j]=0;
 		iqout[i].last=0;
-		iqout[i].id=0;
+		iqout[i].dest=0;
 	}
 
 	iq_capture(resstream[0], keep, core_capturesize, 3, true, iqout[0]);
@@ -187,7 +187,7 @@ bool drivecore_group(unsigned int ncall, resstream_t resstream[], capcount_t cap
 			fail|=true;
 			cout<<"IQ matches and keep not set\n";
 		}
-		if (iqout[i].id!=3 && keepval && !done){
+		if (iqout[i].dest!=3 && keepval && !done){
 			fail|=true;
 			cout<<"Streamid mismatch\n";
 		}

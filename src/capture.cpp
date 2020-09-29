@@ -33,7 +33,7 @@ void phase_capture(phasestream_t &phasestream, uint256_t keep, capcount_t captur
 	phasein=phasestream;
 
 	setdata: for (int i=0;i<N_PHASE;i++) phasetmp.data[i]=phasein.data[i];
-	phasetmp.id=streamid;
+	phasetmp.dest=streamid;
 	phasetmp.last=_remaining==1;
 
 	if (configure) {
@@ -86,7 +86,7 @@ void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, 
 	resin=resstream;
 
 	setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
-	iqtmp.id=streamid;
+	iqtmp.dest=streamid;
 	iqtmp.last=_remaining==1;
 
 	if (configure) {
@@ -141,7 +141,7 @@ void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t captures
 		iqtmp.data[2*i]=iin.data[i];
 		iqtmp.data[2*i+1]=qin.data[i];
 	}
-	iqtmp.id=0;
+	iqtmp.dest=0;
 	iqtmp.last=_remaining==1;
 
 

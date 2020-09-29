@@ -21,7 +21,7 @@ module iq_capture (
         iqout_TDATA,
         iqout_TVALID,
         iqout_TREADY,
-        iqout_TID,
+        iqout_TDEST,
         iqout_TLAST,
         s_axi_control_AWVALID,
         s_axi_control_AWREADY,
@@ -57,11 +57,11 @@ input   resstream_TVALID;
 output   resstream_TREADY;
 input  [7:0] resstream_TUSER;
 input   resstream_TLAST;
-input  [2:0] streamid_V;
+input  [3:0] streamid_V;
 output  [255:0] iqout_TDATA;
 output   iqout_TVALID;
 input   iqout_TREADY;
-output  [2:0] iqout_TID;
+output  [3:0] iqout_TDEST;
 output   iqout_TLAST;
 input   s_axi_control_AWVALID;
 output   s_axi_control_AWREADY;
@@ -97,11 +97,11 @@ reg    iqout_TDATA_blk_n;
 reg    ap_enable_reg_pp0_iter2;
 reg   [0:0] configure_read_reg_215;
 reg   [0:0] configure_read_reg_215_pp0_iter1_reg;
-reg   [0:0] and_ln106_reg_254;
+reg   [0:0] and_ln107_reg_254;
 reg   [0:0] p_Result_s_reg_258;
 reg    ap_enable_reg_pp0_iter3;
 reg   [0:0] configure_read_reg_215_pp0_iter2_reg;
-reg   [0:0] and_ln106_reg_254_pp0_iter2_reg;
+reg   [0:0] and_ln107_reg_254_pp0_iter2_reg;
 reg   [0:0] p_Result_s_reg_258_pp0_iter2_reg;
 wire   [0:0] configure_read_read_fu_74_p2;
 reg    ap_block_state1_pp0_stage0_iter0;
@@ -123,12 +123,12 @@ wire   [0:0] icmp_ln879_fu_129_p2;
 reg   [0:0] icmp_ln879_reg_244;
 wire   [0:0] iqtmp_last_fu_139_p2;
 reg   [0:0] iqtmp_last_reg_249;
-wire   [0:0] and_ln106_fu_166_p2;
+wire   [0:0] and_ln107_fu_166_p2;
 wire   [0:0] p_Result_s_fu_186_p2;
 reg    ap_enable_reg_pp0_iter1;
 reg    ap_block_pp0_stage0_subdone;
 wire   [31:0] add_ln214_fu_192_p2;
-wire   [0:0] or_ln99_fu_149_p2;
+wire   [0:0] or_ln100_fu_149_p2;
 reg    ap_block_pp0_stage0_01001;
 wire   [0:0] icmp_ln895_fu_160_p2;
 wire   [255:0] zext_ln791_fu_172_p1;
@@ -154,9 +154,9 @@ wire    regslice_both_w1_resstream_last_U_ack_in;
 reg    iqout_TVALID_int;
 wire    iqout_TREADY_int;
 wire    regslice_both_iqout_data_V_U_vld_out;
-wire    regslice_both_iqout_id_V_U_apdone_blk;
-wire    regslice_both_iqout_id_V_U_ack_in_dummy;
-wire    regslice_both_iqout_id_V_U_vld_out;
+wire    regslice_both_iqout_dest_V_U_apdone_blk;
+wire    regslice_both_iqout_dest_V_U_ack_in_dummy;
+wire    regslice_both_iqout_dest_V_U_vld_out;
 wire    regslice_both_w1_iqout_last_U_apdone_blk;
 wire    iqout_TLAST_int;
 wire    regslice_both_w1_iqout_last_U_ack_in_dummy;
@@ -260,17 +260,17 @@ regslice_both_iqout_data_V_U(
 );
 
 regslice_both #(
-    .DataWidth( 3 ))
-regslice_both_iqout_id_V_U(
+    .DataWidth( 4 ))
+regslice_both_iqout_dest_V_U(
     .ap_clk(ap_clk),
     .ap_rst(ap_rst_n_inv),
     .data_in(streamid_V),
     .vld_in(iqout_TVALID_int),
-    .ack_in(regslice_both_iqout_id_V_U_ack_in_dummy),
-    .data_out(iqout_TID),
-    .vld_out(regslice_both_iqout_id_V_U_vld_out),
+    .ack_in(regslice_both_iqout_dest_V_U_ack_in_dummy),
+    .data_out(iqout_TDEST),
+    .vld_out(regslice_both_iqout_dest_V_U_vld_out),
     .ack_out(iqout_TREADY),
-    .apdone_blk(regslice_both_iqout_id_V_U_apdone_blk)
+    .apdone_blk(regslice_both_iqout_dest_V_U_apdone_blk)
 );
 
 regslice_both_w1 #(
@@ -330,7 +330,7 @@ always @ (posedge ap_clk) begin
         if ((configure_read_reg_215 == 1'd1)) begin
             p_aligned <= 1'd0;
         end else if ((configure_read_reg_215 == 1'd0)) begin
-            p_aligned <= or_ln99_fu_149_p2;
+            p_aligned <= or_ln100_fu_149_p2;
         end
     end
 end
@@ -347,13 +347,13 @@ end
 
 always @ (posedge ap_clk) begin
     if (((configure_read_reg_215 == 1'd0) & (1'b1 == ap_CS_fsm_pp0_stage0) & (1'b0 == ap_block_pp0_stage0_11001))) begin
-        and_ln106_reg_254 <= and_ln106_fu_166_p2;
+        and_ln107_reg_254 <= and_ln107_fu_166_p2;
     end
 end
 
 always @ (posedge ap_clk) begin
     if ((1'b0 == ap_block_pp0_stage0_11001)) begin
-        and_ln106_reg_254_pp0_iter2_reg <= and_ln106_reg_254;
+        and_ln107_reg_254_pp0_iter2_reg <= and_ln107_reg_254;
         configure_read_reg_215_pp0_iter2_reg <= configure_read_reg_215_pp0_iter1_reg;
         p_Result_s_reg_258_pp0_iter2_reg <= p_Result_s_reg_258;
     end
@@ -379,7 +379,7 @@ always @ (posedge ap_clk) begin
 end
 
 always @ (posedge ap_clk) begin
-    if (((1'd1 == and_ln106_fu_166_p2) & (configure_read_reg_215 == 1'd0) & (1'b1 == ap_CS_fsm_pp0_stage0) & (1'b0 == ap_block_pp0_stage0_11001))) begin
+    if (((1'd1 == and_ln107_fu_166_p2) & (configure_read_reg_215 == 1'd0) & (1'b1 == ap_CS_fsm_pp0_stage0) & (1'b0 == ap_block_pp0_stage0_11001))) begin
         p_Result_s_reg_258 <= p_Result_s_fu_186_p2;
     end
 end
@@ -395,7 +395,7 @@ end
 assign ap_reset_idle_pp0 = 1'b0;
 
 always @ (*) begin
-    if ((((1'd1 == and_ln106_reg_254_pp0_iter2_reg) & (1'b0 == ap_block_pp0_stage0) & (p_Result_s_reg_258_pp0_iter2_reg == 1'd0) & (configure_read_reg_215_pp0_iter2_reg == 1'd0) & (ap_enable_reg_pp0_iter3 == 1'b1)) | ((1'd1 == and_ln106_reg_254) & (1'b0 == ap_block_pp0_stage0) & (p_Result_s_reg_258 == 1'd0) & (configure_read_reg_215_pp0_iter1_reg == 1'd0) & (ap_enable_reg_pp0_iter2 == 1'b1)))) begin
+    if ((((1'd1 == and_ln107_reg_254_pp0_iter2_reg) & (1'b0 == ap_block_pp0_stage0) & (p_Result_s_reg_258_pp0_iter2_reg == 1'd0) & (configure_read_reg_215_pp0_iter2_reg == 1'd0) & (ap_enable_reg_pp0_iter3 == 1'b1)) | ((1'd1 == and_ln107_reg_254) & (1'b0 == ap_block_pp0_stage0) & (p_Result_s_reg_258 == 1'd0) & (configure_read_reg_215_pp0_iter1_reg == 1'd0) & (ap_enable_reg_pp0_iter2 == 1'b1)))) begin
         iqout_TDATA_blk_n = iqout_TREADY_int;
     end else begin
         iqout_TDATA_blk_n = 1'b1;
@@ -447,7 +447,7 @@ end
 
 assign add_ln214_fu_192_p2 = ($signed(p_remaining_V) + $signed(32'd4294967295));
 
-assign and_ln106_fu_166_p2 = (or_ln99_fu_149_p2 & icmp_ln895_fu_160_p2);
+assign and_ln107_fu_166_p2 = (or_ln100_fu_149_p2 & icmp_ln895_fu_160_p2);
 
 assign and_ln791_fu_181_p2 = (shl_ln791_fu_175_p2 & keep_V_read_reg_229);
 
@@ -492,17 +492,17 @@ always @ (*) begin
 end
 
 always @ (*) begin
-    ap_condition_178 = ((1'd1 == and_ln106_fu_166_p2) & (configure_read_reg_215 == 1'd0) & (p_Result_s_fu_186_p2 == 1'd0));
+    ap_condition_178 = ((1'd1 == and_ln107_fu_166_p2) & (configure_read_reg_215 == 1'd0) & (p_Result_s_fu_186_p2 == 1'd0));
 end
 
 assign ap_enable_pp0 = (ap_idle_pp0 ^ 1'b1);
 
 always @ (*) begin
-    ap_predicate_op31_write_state3 = ((1'd1 == and_ln106_reg_254) & (p_Result_s_reg_258 == 1'd0) & (configure_read_reg_215_pp0_iter1_reg == 1'd0));
+    ap_predicate_op31_write_state3 = ((1'd1 == and_ln107_reg_254) & (p_Result_s_reg_258 == 1'd0) & (configure_read_reg_215_pp0_iter1_reg == 1'd0));
 end
 
 always @ (*) begin
-    ap_predicate_op51_write_state4 = ((1'd1 == and_ln106_reg_254_pp0_iter2_reg) & (p_Result_s_reg_258_pp0_iter2_reg == 1'd0) & (configure_read_reg_215_pp0_iter2_reg == 1'd0));
+    ap_predicate_op51_write_state4 = ((1'd1 == and_ln107_reg_254_pp0_iter2_reg) & (p_Result_s_reg_258_pp0_iter2_reg == 1'd0) & (configure_read_reg_215_pp0_iter2_reg == 1'd0));
 end
 
 always @ (*) begin
@@ -521,7 +521,7 @@ assign iqout_TVALID = regslice_both_iqout_data_V_U_vld_out;
 
 assign iqtmp_last_fu_139_p2 = ((p_remaining_V == 32'd1) ? 1'b1 : 1'b0);
 
-assign or_ln99_fu_149_p2 = (p_aligned | icmp_ln879_reg_244);
+assign or_ln100_fu_149_p2 = (p_aligned | icmp_ln879_reg_244);
 
 assign p_Result_s_fu_186_p2 = ((and_ln791_fu_181_p2 == 256'd0) ? 1'b1 : 1'b0);
 

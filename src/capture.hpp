@@ -25,7 +25,7 @@ typedef ap_uint<16> phase_t;
 typedef ap_uint<N_PHASE*2> phasekeep_t;
 typedef ap_uint<32> capcount_t;  //27min
 typedef ap_uint<4> keepcnt_t;
-typedef ap_uint<3> streamid_t;
+typedef ap_uint<4> streamid_t;
 typedef ap_uint<256> uint256_t;
 
 typedef struct adcstream_t {
@@ -46,13 +46,13 @@ typedef struct phasestream_t {
 
 typedef struct iqout_t {
 	sample_t data[N_IQ*2];
-	streamid_t id;
+	streamid_t dest;
 	bool last;
 } iqout_t;
 
 typedef struct phaseout_t {
 	sample_t data[N_PHASE];
-	streamid_t id;
+	streamid_t dest;
 	bool last;
 } phaseout_t;
 
