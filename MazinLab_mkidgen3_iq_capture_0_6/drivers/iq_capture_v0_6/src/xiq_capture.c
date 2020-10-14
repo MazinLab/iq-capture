@@ -63,20 +63,3 @@ u32 XIq_capture_Get_capturesize_V(XIq_capture *InstancePtr) {
     return Data;
 }
 
-void XIq_capture_Set_configure(XIq_capture *InstancePtr, u32 Data) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XIq_capture_WriteReg(InstancePtr->Control_BaseAddress, XIQ_CAPTURE_CONTROL_ADDR_CONFIGURE_DATA, Data);
-}
-
-u32 XIq_capture_Get_configure(XIq_capture *InstancePtr) {
-    u32 Data;
-
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Data = XIq_capture_ReadReg(InstancePtr->Control_BaseAddress, XIQ_CAPTURE_CONTROL_ADDR_CONFIGURE_DATA);
-    return Data;
-}
-

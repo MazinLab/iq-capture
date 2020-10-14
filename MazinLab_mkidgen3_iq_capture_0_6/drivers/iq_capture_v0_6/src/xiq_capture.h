@@ -93,8 +93,6 @@ void XIq_capture_Set_keep_V(XIq_capture *InstancePtr, XIq_capture_Keep_v Data);
 XIq_capture_Keep_v XIq_capture_Get_keep_V(XIq_capture *InstancePtr);
 void XIq_capture_Set_capturesize_V(XIq_capture *InstancePtr, u32 Data);
 u32 XIq_capture_Get_capturesize_V(XIq_capture *InstancePtr);
-void XIq_capture_Set_configure(XIq_capture *InstancePtr, u32 Data);
-u32 XIq_capture_Get_configure(XIq_capture *InstancePtr);
 
 #ifdef __cplusplus
 }

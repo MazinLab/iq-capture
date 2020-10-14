@@ -75,10 +75,13 @@ void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, 
 #pragma HLS INTERFACE s_axilite port=keep bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
 #pragma HLS INTERFACE ap_stable port=streamid
-#pragma HLS INTERFACE s_axilite port=configure bundle=control
+//#pragma HLS INTERFACE s_axilite port=configure bundle=control
+#pragma HLS INTERFACE ap_none port=configure
+
 
 
 	static capcount_t _remaining=0;
+	static group_t _count=0;
 	static bool _aligned=false;
 	resstream_t resin;
 	iqout_t iqtmp;
@@ -87,7 +90,7 @@ void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, 
 
 	setdata: for (int i=0;i<N_IQ*2;i++) iqtmp.data[i]=resin.data[i];
 	iqtmp.dest=streamid;
-	iqtmp.last=_remaining==1;
+	iqtmp.last=_count==255;
 
 	if (configure) {
 		_remaining=capturesize;
@@ -113,6 +116,7 @@ void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, 
 
 			iqout=iqtmp;
 			_remaining=_remaining-1;
+			_count=_count+1;
 		}
 	}
 
@@ -126,8 +130,10 @@ void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t captures
 #pragma HLS INTERFACE axis register port=adcout
 #pragma HLS DATA_PACK variable=istream
 #pragma HLS DATA_PACK variable=qstream
-#pragma HLS INTERFACE s_axilite port=capturesize bundle=control //clock=control_clk
-#pragma HLS INTERFACE s_axilite port=configure bundle=control //clock=control_clk
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+//#pragma HLS INTERFACE s_axilite port=configure bundle=control
+#pragma HLS INTERFACE ap_none port=configure
+
 
 
 	static capcount_t _remaining;

@@ -8,7 +8,7 @@ use IEEE.NUMERIC_STD.all;
 
 entity iq_capture_control_s_axi is
 generic (
-    C_S_AXI_ADDR_WIDTH    : INTEGER := 7;
+    C_S_AXI_ADDR_WIDTH    : INTEGER := 6;
     C_S_AXI_DATA_WIDTH    : INTEGER := 32);
 port (
     ACLK                  :in   STD_LOGIC;
@@ -32,8 +32,7 @@ port (
     RVALID                :out  STD_LOGIC;
     RREADY                :in   STD_LOGIC;
     keep_V                :out  STD_LOGIC_VECTOR(255 downto 0);
-    capturesize_V         :out  STD_LOGIC_VECTOR(31 downto 0);
-    configure             :out  STD_LOGIC_VECTOR(0 downto 0)
+    capturesize_V         :out  STD_LOGIC_VECTOR(31 downto 0)
 );
 end entity iq_capture_control_s_axi;
 
@@ -62,10 +61,6 @@ end entity iq_capture_control_s_axi;
 -- 0x34 : Data signal of capturesize_V
 --        bit 31~0 - capturesize_V[31:0] (Read/Write)
 -- 0x38 : reserved
--- 0x3c : Data signal of configure
---        bit 0  - configure[0] (Read/Write)
---        others - reserved
--- 0x40 : reserved
 -- (SC = Self Clear, COR = Clear on Read, TOW = Toggle on Write, COH = Clear on Handshake)
 
 architecture behave of iq_capture_control_s_axi is
@@ -84,9 +79,7 @@ architecture behave of iq_capture_control_s_axi is
     constant ADDR_KEEP_V_CTRL          : INTEGER := 16#30#;
     constant ADDR_CAPTURESIZE_V_DATA_0 : INTEGER := 16#34#;
     constant ADDR_CAPTURESIZE_V_CTRL   : INTEGER := 16#38#;
-    constant ADDR_CONFIGURE_DATA_0     : INTEGER := 16#3c#;
-    constant ADDR_CONFIGURE_CTRL       : INTEGER := 16#40#;
-    constant ADDR_BITS         : INTEGER := 7;
+    constant ADDR_BITS         : INTEGER := 6;
 
     signal waddr               : UNSIGNED(ADDR_BITS-1 downto 0);
     signal wmask               : UNSIGNED(31 downto 0);
@@ -102,7 +95,6 @@ architecture behave of iq_capture_control_s_axi is
     -- internal registers
     signal int_keep_V          : UNSIGNED(255 downto 0) := (others => '0');
     signal int_capturesize_V   : UNSIGNED(31 downto 0) := (others => '0');
-    signal int_configure       : UNSIGNED(0 downto 0) := (others => '0');
 
 
 begin
@@ -234,8 +226,6 @@ begin
                         rdata_data <= RESIZE(int_keep_V(255 downto 224), 32);
                     when ADDR_CAPTURESIZE_V_DATA_0 =>
                         rdata_data <= RESIZE(int_capturesize_V(31 downto 0), 32);
-                    when ADDR_CONFIGURE_DATA_0 =>
-                        rdata_data <= RESIZE(int_configure(0 downto 0), 32);
                     when others =>
                         rdata_data <= (others => '0');
                     end case;
@@ -247,7 +237,6 @@ begin
 -- ----------------------- Register logic ----------------
     keep_V               <= STD_LOGIC_VECTOR(int_keep_V);
     capturesize_V        <= STD_LOGIC_VECTOR(int_capturesize_V);
-    configure            <= STD_LOGIC_VECTOR(int_configure);
 
     process (ACLK)
     begin
@@ -343,17 +332,6 @@ begin
             if (ACLK_EN = '1') then
                 if (w_hs = '1' and waddr = ADDR_CAPTURESIZE_V_DATA_0) then
                     int_capturesize_V(31 downto 0) <= (UNSIGNED(WDATA(31 downto 0)) and wmask(31 downto 0)) or ((not wmask(31 downto 0)) and int_capturesize_V(31 downto 0));
-                end if;
-            end if;
-        end if;
-    end process;
-
-    process (ACLK)
-    begin
-        if (ACLK'event and ACLK = '1') then
-            if (ACLK_EN = '1') then
-                if (w_hs = '1' and waddr = ADDR_CONFIGURE_DATA_0) then
-                    int_configure(0 downto 0) <= (UNSIGNED(WDATA(0 downto 0)) and wmask(0 downto 0)) or ((not wmask(0 downto 0)) and int_configure(0 downto 0));
                 end if;
             end if;
         end if;

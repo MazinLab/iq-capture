@@ -27,16 +27,10 @@
 // 0x34 : Data signal of capturesize_V
 //        bit 31~0 - capturesize_V[31:0] (Read/Write)
 // 0x38 : reserved
-// 0x3c : Data signal of configure
-//        bit 0  - configure[0] (Read/Write)
-//        others - reserved
-// 0x40 : reserved
 // (SC = Self Clear, COR = Clear on Read, TOW = Toggle on Write, COH = Clear on Handshake)
 
 #define XIQ_CAPTURE_CONTROL_ADDR_KEEP_V_DATA        0x10
 #define XIQ_CAPTURE_CONTROL_BITS_KEEP_V_DATA        256
 #define XIQ_CAPTURE_CONTROL_ADDR_CAPTURESIZE_V_DATA 0x34
 #define XIQ_CAPTURE_CONTROL_BITS_CAPTURESIZE_V_DATA 32
-#define XIQ_CAPTURE_CONTROL_ADDR_CONFIGURE_DATA     0x3c
-#define XIQ_CAPTURE_CONTROL_BITS_CONFIGURE_DATA     1
 

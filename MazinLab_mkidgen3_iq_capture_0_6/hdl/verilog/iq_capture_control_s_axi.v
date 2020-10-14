@@ -5,7 +5,7 @@
 `timescale 1ns/1ps
 module iq_capture_control_s_axi
 #(parameter
-    C_S_AXI_ADDR_WIDTH = 7,
+    C_S_AXI_ADDR_WIDTH = 6,
     C_S_AXI_DATA_WIDTH = 32
 )(
     input  wire                          ACLK,
@@ -29,8 +29,7 @@ module iq_capture_control_s_axi
     output wire                          RVALID,
     input  wire                          RREADY,
     output wire [255:0]                  keep_V,
-    output wire [31:0]                   capturesize_V,
-    output wire [0:0]                    configure
+    output wire [31:0]                   capturesize_V
 );
 //------------------------Address Info-------------------
 // 0x00 : reserved
@@ -57,27 +56,21 @@ module iq_capture_control_s_axi
 // 0x34 : Data signal of capturesize_V
 //        bit 31~0 - capturesize_V[31:0] (Read/Write)
 // 0x38 : reserved
-// 0x3c : Data signal of configure
-//        bit 0  - configure[0] (Read/Write)
-//        others - reserved
-// 0x40 : reserved
 // (SC = Self Clear, COR = Clear on Read, TOW = Toggle on Write, COH = Clear on Handshake)
 
 //------------------------Parameter----------------------
 localparam
-    ADDR_KEEP_V_DATA_0        = 7'h10,
-    ADDR_KEEP_V_DATA_1        = 7'h14,
-    ADDR_KEEP_V_DATA_2        = 7'h18,
-    ADDR_KEEP_V_DATA_3        = 7'h1c,
-    ADDR_KEEP_V_DATA_4        = 7'h20,
-    ADDR_KEEP_V_DATA_5        = 7'h24,
-    ADDR_KEEP_V_DATA_6        = 7'h28,
-    ADDR_KEEP_V_DATA_7        = 7'h2c,
-    ADDR_KEEP_V_CTRL          = 7'h30,
-    ADDR_CAPTURESIZE_V_DATA_0 = 7'h34,
-    ADDR_CAPTURESIZE_V_CTRL   = 7'h38,
-    ADDR_CONFIGURE_DATA_0     = 7'h3c,
-    ADDR_CONFIGURE_CTRL       = 7'h40,
+    ADDR_KEEP_V_DATA_0        = 6'h10,
+    ADDR_KEEP_V_DATA_1        = 6'h14,
+    ADDR_KEEP_V_DATA_2        = 6'h18,
+    ADDR_KEEP_V_DATA_3        = 6'h1c,
+    ADDR_KEEP_V_DATA_4        = 6'h20,
+    ADDR_KEEP_V_DATA_5        = 6'h24,
+    ADDR_KEEP_V_DATA_6        = 6'h28,
+    ADDR_KEEP_V_DATA_7        = 6'h2c,
+    ADDR_KEEP_V_CTRL          = 6'h30,
+    ADDR_CAPTURESIZE_V_DATA_0 = 6'h34,
+    ADDR_CAPTURESIZE_V_CTRL   = 6'h38,
     WRIDLE                    = 2'd0,
     WRDATA                    = 2'd1,
     WRRESP                    = 2'd2,
@@ -85,7 +78,7 @@ localparam
     RDIDLE                    = 2'd0,
     RDDATA                    = 2'd1,
     RDRESET                   = 2'd2,
-    ADDR_BITS         = 7;
+    ADDR_BITS         = 6;
 
 //------------------------Local signal-------------------
     reg  [1:0]                    wstate = WRRESET;
@@ -102,7 +95,6 @@ localparam
     // internal registers
     reg  [255:0]                  int_keep_V = 'b0;
     reg  [31:0]                   int_capturesize_V = 'b0;
-    reg  [0:0]                    int_configure = 'b0;
 
 //------------------------Instantiation------------------
 
@@ -221,9 +213,6 @@ always @(posedge ACLK) begin
                 ADDR_CAPTURESIZE_V_DATA_0: begin
                     rdata <= int_capturesize_V[31:0];
                 end
-                ADDR_CONFIGURE_DATA_0: begin
-                    rdata <= int_configure[0:0];
-                end
             endcase
         end
     end
@@ -233,7 +222,6 @@ end
 //------------------------Register logic-----------------
 assign keep_V        = int_keep_V;
 assign capturesize_V = int_capturesize_V;
-assign configure     = int_configure;
 // int_keep_V[31:0]
 always @(posedge ACLK) begin
     if (ARESET)
@@ -321,16 +309,6 @@ always @(posedge ACLK) begin
     else if (ACLK_EN) begin
         if (w_hs && waddr == ADDR_CAPTURESIZE_V_DATA_0)
             int_capturesize_V[31:0] <= (WDATA[31:0] & wmask) | (int_capturesize_V[31:0] & ~wmask);
-    end
-end
-
-// int_configure[0:0]
-always @(posedge ACLK) begin
-    if (ARESET)
-        int_configure[0:0] <= 0;
-    else if (ACLK_EN) begin
-        if (w_hs && waddr == ADDR_CONFIGURE_DATA_0)
-            int_configure[0:0] <= (WDATA[31:0] & wmask) | (int_configure[0:0] & ~wmask);
     end
 end
 
