@@ -1,4 +1,4 @@
-#include "capture.hpp"
+#include "filter.hpp"
 #include <iostream>
 #include <bitset>
 #define MAX_SAMP 512+3
@@ -14,123 +14,187 @@ int bitsum(uint256_t x) {
 	}
 	return ret;
 }
+int bitsum(uint512_t x) {
+	int ret=0;
+	for (int i=0;i<512;i++) {
+		if (x[i]) ret++;
+	}
+	return ret;
+}
+int lastbit(uint256_t x) {
+	int ret=0;
+	for (int i=0;i<256;i++) {
+		if (x[i]) ret=i;
+	}
+	return ret;
+}
+int lastbit(uint512_t x) {
+	int ret=0;
+	for (int i=0;i<512;i++) {
+		if (x[i]) ret=i;
+	}
+	return ret;
+}
 
-bool drive_iq(uint256_t out[],  capcount_t persamp_capturesize) {
+resstream_t iq_for_sample(int i) {
+	resstream_t d;
+	d.data=i;
+	d.last=i%256 == 255;
+	d.user=i%256;
+	return d;
+}
 
 
-	hls::stream<resstream_t> streamin;
+bool drive_iq(uint256_t out[]) {
+
+
+	hls::stream<resstream_t> streamin("input");
+	hls::stream<iqout_t> filteredstream("filtered"), filteredstreamin("filtered");
+	iqout_t filtereddata[2048];
 	uint256_t keep;
 	bool fail=false;
-
+	int offset=13; //the group the core gets at start
+//	int n_iq = 7;
+	int capturesize=8;  //only even values allowed
 	//210=31 200=15 205=23  %2=7  <128=15
-	for (int i=0;i<N_GROUPS; i++) keep[i]=1;//i%2;
+	for (int i=0;i<N_GROUPS; i++) keep[i]=i%2;
 	int nkeep = bitsum(keep);
-
-	capcount_t capturesize = nkeep*persamp_capturesize;
-	totalcapcount_t total_capturesize = 256*persamp_capturesize;
-
-	//1*4GB worth ->persamp_capturesize=4GB/32B=1024^3*4/32=134M ->  max total_capturesize 2^35
+    int total_size=256*capturesize;
 
 
-//	capturesizebitsum(keep)
-//	cs=256 tk=1 ->tcs 256*256
-//	cs=128*tk tk=2 -> tcs=128*256
-//	cs=127*tk tk=3 -> tcs = 127*256
-//	cs=1*tk tk=256 - > tcs = 1*256
-//
-//	cs=2 tk=256 -> tcs=2
-//
-//	cs=3*tk -> tcs=3*256
-	cout<<"Keeping "<<capturesize<<" samples total, "<<persamp_capturesize<<" each of "<<nkeep<<" groups.\n";
-	cout<<"Total samples required through core: "<<total_capturesize<<endl;
-
-	if (total_capturesize>2048) {
-		cout<<"Need to increase stream directive for successful transfer of "<<total_capturesize<<" samples.\n";
+	if (total_size>2048) {
+		cout<<"Need to increase stream directive for successful transfer of "<<total_size<<" samples.\n";
 		return true;
 	} else{
-		cout<<"Will send "<<total_capturesize<<" samples.\n";
+		cout<<"Will send "<<total_size<<" samples.\n";
 	}
+	for (int j=0;j<total_size;j++)
+		streamin.write(iq_for_sample(j+offset));
 
-
-	for (int i=0;i<total_capturesize;i++){
-		resstream_t d;
-		d.data=i;
-		d.last=i%256 == 255;
-		d.user=i%256;
-		streamin.write(d);
-	}
-
-	//total_capturesize sets how many samples the core will ingest
-	//keep sets which of those samples (out of each group of 256) will be forwarded on
-	//capturesize sets how many samples the core will output
-	//In the implementation there will always be more data avaialble on the input stream
-	//if total_capturesize is too small the core will never terminate. it must be at least (256-bitsum(keep)+1)*capturesize if it is more then there will be leftover internal data
 	// keep must have at least 1 bit set
-	iq_capture(streamin, keep, total_capturesize, capturesize, out);
+	for (int j=0;j<total_size;j++)
+		filter_iq(streamin, filteredstream, keep, lastbit(keep));
+
+	int i=0;
+	while(!filteredstream.empty()) {
+		iqout_t x=filteredstream.read();
+		filteredstreamin.write(x);
+		cout<<"filtered["<<i<<"]="<<x.data<<" last="<<x.last<<endl;
+		filtereddata[i++]=x;
+	}
 
 
+	write_axi256(filteredstreamin, capturesize, out);
 
-	int captured=0;
+	cout<<"Capture "<<capturesize<<" samples."<<endl;
+	for (int j=0;j<capturesize+2;j++) {
+		cout<<"out["<<j<<"]="<<out[j]<<endl;
+	}
 	bool aligned=false;
-	for (int i=0;i<total_capturesize;i++) {
-		aligned|=((i%256))%256==0;
-		if (keep[i%256] && captured<capturesize && aligned) {
-			if (out[captured]!=i)
-				cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
-			fail|=out[captured]!=i;
-			captured++;
-		} else {
-			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
-			if (captured==capturesize) break;
-		}
-	}
-
-	//Rest better still be zero
-	while (captured<OUT_BUF_SIZE) fail|=out[captured++]!=0;
-
-	return fail;
-}
-
-bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
-
-	hls::stream<uint128_t> istream, qstream;
-	bool fail=false;
-
-	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
-	for (int i=0;i<samples;i++){
-		istream.write(i);
-		qstream.write(samples-i);
-	}
-
-	adc_capture(istream, qstream, capturesize, out);
-
 	int captured=0;
-	for (int i=0;i<samples;i++) {
-		if (captured<capturesize) {
-
-			uint256_t tmp;
-			uint128_t ival=i,qval=samples-i;
-			bundle: for (int i=0;i<N_IQ;i++){
-				tmp.range(32*(i+1)-1-16, 32*i)=ival.range(16*(i+1)-1, 16*i);
-				tmp.range(32*(i+1)-1, 32*i+16)=qval.range(16*(i+1)-1, 16*i);
+	for (int j=0;j<total_size;j++) {
+		resstream_t d = iq_for_sample(j+offset);
+		if (keep[d.user] && aligned && (captured<capturesize) ){
+			if (out[captured++]!=d.data) {
+				cout<<"Expected value "<<out[captured-1]<<" to be "<<d.data<<endl;
+				fail=true;
 			}
-
-			if (out[captured]!=tmp){
-				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<" (cycle="<<i<<")"<<endl;
-				fail|=out[captured]!=i;
-			} else {cout<<"OK "<<out[captured]<<" (cycle="<<i<<")"<<endl;}
-			captured++;
-		} else {
-			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
-			if (captured==capturesize) break;
+		}
+		aligned |= d.last;
+	}
+	for (int j=captured;j<OUT_BUF_SIZE;j++) {
+		if (out[j]!=0) {
+			cout<<"too much output"<<endl;
+			fail=true;
 		}
 	}
 
-	//Rest better still be zero
-	while (captured<OUT_BUF_SIZE) fail|=out[captured++]!=0;
+//	for (int i=0;i<OUT_BUF_SIZE;i++){
+//		if ((i<capturesize) && (out[i]!=filtereddata[i].data)){
+//			cout<<"mismatch"<<endl;
+//			fail=true;
+//		} else if ((i>=capturesize) && (out[i]!=0)){
+//			cout<<"too much output"<<endl;
+//			fail=true;
+//		}
+//	}
+
+
+
+//	int captured=0;
+//	bool aligned=true;
+//	int lastgrp = lastbit(keep);
+//	for (int j=0;j<total_size;j++) {
+//
+//		resstream_t d = iq_for_sample(j+offset);
+//
+//		if (keep[d.user]){
+//			if (!filteredstream.empty()) {
+//				iqout_t x=filteredstream.read();
+//
+//				if (x.data!=d.data){
+//					cout<<"Expected value "<<x.data<<" to be "<<d.data<<endl;
+//					fail=true;
+//				}
+//				if ((d.user.to_uint()==lastgrp)!=x.last){
+//					cout<<"Expected last to be "<<(d.user.to_uint()==lastgrp)<<endl;
+//					fail=true;
+//				}
+//			} else {
+//				cout<<"premature empty stream"<<endl;
+//				fail=true;
+//			}
+//		}
+//	}
+//	if (!filteredstream.empty()) {
+//		cout<<"stream has extra data"<<endl;
+//		fail=true;
+//	}
+
 
 	return fail;
 }
+//
+//bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
+//
+//	hls::stream<uint128_t> istream, qstream;
+//	bool fail=false;
+//
+//	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
+//	for (int i=0;i<samples;i++){
+//		istream.write(i);
+//		qstream.write(samples-i);
+//	}
+//
+//	adc_capture(istream, qstream, capturesize, out);
+//
+//	int captured=0;
+//	for (int i=0;i<samples;i++) {
+//		if (captured<capturesize) {
+//
+//			uint256_t tmp;
+//			uint128_t ival=i,qval=samples-i;
+//			bundle: for (int i=0;i<N_IQ;i++){
+//				tmp.range(32*(i+1)-1-16, 32*i)=ival.range(16*(i+1)-1, 16*i);
+//				tmp.range(32*(i+1)-1, 32*i+16)=qval.range(16*(i+1)-1, 16*i);
+//			}
+//
+//			if (out[captured]!=tmp){
+//				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<" (cycle="<<i<<")"<<endl;
+//				fail|=out[captured]!=i;
+//			} else {cout<<"OK "<<out[captured]<<" (cycle="<<i<<")"<<endl;}
+//			captured++;
+//		} else {
+//			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
+//			if (captured==capturesize) break;
+//		}
+//	}
+//
+//	//Rest better still be zero
+//	while (captured<OUT_BUF_SIZE) fail|=out[captured++]!=0;
+//
+//	return fail;
+//}
 
 int main (void){
 
@@ -140,7 +204,7 @@ int main (void){
 	ap_uint<256> out[OUT_BUF_SIZE];
 	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
 
-	fail|=drive_iq(out, 8);
+	fail|=drive_iq(out);
 	//fail|=drive_adc(1500, out, 1398);
 
 	if (fail) {
