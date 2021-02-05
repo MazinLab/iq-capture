@@ -8,8 +8,9 @@
  * Phase Stream is 512M*8B ~4 GB/s (4 phase 2 bytes @ 512MHz)
 */
 #include "ap_int.h"
-#include "ap_fixed.h"
-
+#include "axi.h"
+#include "hls_stream.h"
+#include <ap_utils.h>
 
 #define N_IQ 8
 #define N_PHASE 4
@@ -23,7 +24,7 @@ typedef ap_uint<N_IQ*4> iqkeep_t;
 typedef ap_uint<16> sample_t;
 typedef ap_uint<16> phase_t;
 typedef ap_uint<N_PHASE*2> phasekeep_t;
-typedef ap_uint<32> capcount_t;  //27min
+typedef ap_uint<27> capcount_t;  //27min
 typedef ap_uint<4> keepcnt_t;
 typedef ap_uint<4> streamid_t;
 typedef ap_uint<256> uint256_t;
@@ -32,11 +33,12 @@ typedef struct adcstream_t {
 	sample_t data[N_IQ];
 } adcstream_t;
 
-typedef struct resstream_t {
-	sample_t data[N_IQ*2];
-	group_t user;
-	bool last;
-} resstream_t;
+//typedef struct resstream_t {
+//	sample_t data[N_IQ*2];
+//	group_t user;
+//	bool last;
+//} resstream_t;
+typedef ap_axiu<N_IQ*32,8,0,0> resstream_t;
 
 typedef struct phasestream_t {
 	sample_t data[N_PHASE];
@@ -56,9 +58,8 @@ typedef struct phaseout_t {
 	bool last;
 } phaseout_t;
 
-unsigned char bitcount_sa8(keep_t x);
-void phase_capture(phasestream_t &phasestream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, bool config,
-				   phaseout_t &phaseout);
-void iq_capture(resstream_t &resstream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, bool config,
-				iqout_t &iqout);
-void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, bool config, iqout_t &adcout);
+//unsigned char bitcount_sa8(keep_t x);
+//void phase_capture(phasestream_t &phasestream, uint256_t keep, capcount_t capturesize, const streamid_t streamid, bool config,
+//				   phaseout_t &phaseout);
+void iq_capture(hls::stream<resstream_t> &resstream, uint256_t keep, capcount_t capturesize, volatile uint256_t *iqout);
+//void adc_capture(adcstream_t &istream, adcstream_t &qstream, capcount_t capturesize, bool config, iqout_t &adcout);
