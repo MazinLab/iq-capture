@@ -21,7 +21,7 @@ bool driveiq_group(unsigned int samples, uint256_t out[],  capcount_t capturesiz
 		resstream_t d;
 		d.data=i;
 		d.last=i%256 == 255;
-		d.user=i%256;
+		d.user=i%256+1;
 		streamin.write(d);
 	}
 
@@ -29,13 +29,18 @@ bool driveiq_group(unsigned int samples, uint256_t out[],  capcount_t capturesiz
 
 
 	int captured=0;
+	bool aligned=false;
 	for (int i=0;i<samples;i++) {
-		if (keep[i%256] && captured<capturesize) {
+		aligned|=((i%256)+1)%256==0;
+		if (keep[i%256] && captured<capturesize && aligned) {
 			if (out[captured]!=i)
 				cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
 			fail|=out[captured]!=i;
 			captured++;
-		} else if (captured==capturesize) break;
+		} else {
+			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
+			if (captured==capturesize) break;
+		}
 	}
 
 	//Rest better still be zero
@@ -51,7 +56,7 @@ int main (void){
 
 	ap_uint<256> out[OUT_BUF_SIZE];
 
-	fail|=driveiq_group(512, out, 512);
+	fail|=driveiq_group(512, out, 256);
 //	cout<<"\n\nSelecting DDS\n\n";
 //	fail|=drivecore_group(11, ddsstream, 5);
 //	cout<<"\n\nSelecting LP\n\n";
