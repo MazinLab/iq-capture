@@ -7,7 +7,7 @@ using namespace std;
 
 #define OUT_BUF_SIZE 1000
 
-bool driveiq_group(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
+bool drive_iq(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
 
 
 	hls::stream<resstream_t> streamin;
@@ -49,6 +49,47 @@ bool driveiq_group(unsigned int samples, uint256_t out[],  capcount_t capturesiz
 	return fail;
 }
 
+bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
+
+	hls::stream<uint128_t> istream, qstream;
+	bool fail=false;
+
+	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
+	for (int i=0;i<samples;i++){
+		istream.write(i);
+		qstream.write(samples-i);
+	}
+
+	adc_capture(istream, qstream, capturesize, out);
+
+	int captured=0;
+	for (int i=0;i<samples;i++) {
+		if (captured<capturesize) {
+
+			uint256_t tmp;
+			uint128_t ival=i,qval=samples-i;
+			bundle: for (int i=0;i<N_IQ;i++){
+				tmp.range(32*(i+1)-1-16, 32*i)=ival.range(16*(i+1)-1, 16*i);
+				tmp.range(32*(i+1)-1, 32*i+16)=qval.range(16*(i+1)-1, 16*i);
+			}
+
+			if (out[captured]!=tmp){
+				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<endl;
+				fail|=out[captured]!=i;
+			}
+			captured++;
+		} else {
+			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
+			if (captured==capturesize) break;
+		}
+	}
+
+	//Rest better still be zero
+	while (captured<OUT_BUF_SIZE) fail|=out[captured++]!=0;
+
+	return fail;
+}
+
 int main (void){
 
 	bool fail=false;
@@ -56,15 +97,8 @@ int main (void){
 
 	ap_uint<256> out[OUT_BUF_SIZE];
 
-	fail|=driveiq_group(512, out, 256);
-//	cout<<"\n\nSelecting DDS\n\n";
-//	fail|=drivecore_group(11, ddsstream, 5);
-//	cout<<"\n\nSelecting LP\n\n";
-//	fail|=drivecore_group(11, lpstream, 5);
-
-//	fail|=drivephase_group(11,phasestream,5);
-
-//	fail|=driveadc_group(11,istream, qstream,5);
+//	fail|=drive_iq(512, out, 256);
+	fail|=drive_adc(1000, out, 769);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
