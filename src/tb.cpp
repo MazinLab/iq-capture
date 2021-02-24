@@ -60,7 +60,7 @@ bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
 		qstream.write(samples-i);
 	}
 
-	adc_capture(istream, qstream, capturesize, out);
+	adc_capture_df(istream, qstream, capturesize, out);
 
 	int captured=0;
 	for (int i=0;i<samples;i++) {

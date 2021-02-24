@@ -60,7 +60,6 @@ void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched2, hls::str
 template <class T>
 void done_detect(hls::stream<T> &forwarded, hls::stream<capcount_t> &captured, hls::stream<bool> &donein, capcount_t const capturesize, hls::stream<T> &toout, hls::stream<bool> &done){
 	bool _done=false;
-	capcount_t _captured=0;
 	forward: while(!donein.read()){
 #pragma HLS PIPELINE II=1
 		uint256_t out = forwarded.read();
@@ -209,5 +208,64 @@ void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstrea
 		uint128_t q_in = qstream.read();
 		out_addr[i]=pair_iq(i_in, q_in);
 	}
+
+}
+
+
+void pair_iq_df(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in, hls::stream<uint256_t> &out, hls::stream<bool> &done) {
+
+	read: while (true) {
+#pragma HLS PIPELINE II=1
+		if(i_in.empty() || q_in.empty()) {
+			done.write(true);
+			break;
+		}
+		out.write(pair_iq(i_in.read(), q_in.read()));
+		done.write(false);
+	}
+}
+
+
+void adc_done_detect(hls::stream<uint256_t> &forwarded, hls::stream<bool> &donein, capcount_t const capturesize, hls::stream<uint256_t> &toout, hls::stream<bool> &done){
+	bool _done=false;
+	capcount_t _captured=0;
+	forward: while(!donein.read()){
+#pragma HLS PIPELINE II=1
+		uint256_t out = forwarded.read();
+		if (!_done) {
+			_done = _captured==capturesize-1;
+			toout.write(out);
+			done.write(_done);
+		}
+		_captured++;
+	}
+	if (!_done) {
+		toout.write(0);
+		done.write(true);
+	}
+}
+
+void adc_capture_df(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *iqout) {
+#pragma HLS DATAFLOW
+#pragma HLS INTERFACE axis register port=istream depth=2048
+#pragma HLS INTERFACE axis register port=qstream depth=2048
+#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=1000 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1
+#pragma HLS INTERFACE s_axilite port=iqout bundle=control
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
+
+	hls::stream<uint256_t> iq_in("fetch"), toout("toout");
+	hls::stream<bool> done("done"),  last("last");
+//#pragma HLS STREAM variable=fetched depth=3
+//#pragma HLS STREAM variable=forwarded depth=3
+//#pragma HLS STREAM variable=fetched2 depth=3
+//#pragma HLS STREAM variable=done depth=3
+//#pragma HLS STREAM variable=last depth=512
+//#pragma HLS STREAM variable=tout depth=512
+
+	pair_iq_df(istream, qstream, iq_in, done);
+	adc_done_detect(iq_in, done, capturesize, toout, last);
+	put_data<uint256_t>(toout, last, iqout);
 
 }
