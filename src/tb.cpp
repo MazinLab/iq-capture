@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#define OUT_BUF_SIZE 1000
+#define OUT_BUF_SIZE 2048
 
 bool drive_iq(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
 
@@ -98,7 +98,7 @@ int main (void){
 	ap_uint<256> out[OUT_BUF_SIZE];
 
 //	fail|=drive_iq(512, out, 256);
-	fail|=drive_adc(1000, out, 769);
+	fail|=drive_adc(1500, out, 1399);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
