@@ -19,11 +19,12 @@
 
 typedef ap_uint<8> group_t;
 typedef ap_uint<9> phasegroup_t;
-typedef ap_uint<N_IQ> keep_t;
+typedef ap_uint<N_GROUPS> keep_t;
 typedef ap_uint<N_IQ*4> iqkeep_t;
 typedef ap_uint<16> sample_t;
 typedef ap_uint<16> phase_t;
 typedef ap_uint<27> capcount_t;  //27 min 32 max
+typedef ap_uint<27+8> totalcapcount_t;
 typedef ap_uint<4> streamid_t;
 typedef ap_uint<256> uint256_t;
 typedef ap_uint<128> uint128_t;
@@ -32,6 +33,5 @@ typedef ap_uint<128> uint128_t;
 typedef ap_axiu<N_IQ*32,8,0,0> resstream_t;
 typedef ap_axiu<N_PHASE*16,9,0,0> phasestream_t;
 
-void iq_capture(hls::stream<resstream_t> &resstream, uint256_t keep, capcount_t capturesize, uint256_t *out);
+void iq_capture(hls::stream<resstream_t> &resstream, uint256_t keep, totalcapcount_t total_capturesize, capcount_t capturesize, uint256_t *out);
 void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *out);
-void adc_capture_df(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *out);

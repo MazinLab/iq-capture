@@ -21,85 +21,41 @@ using namespace std;
 #define BURST_LEN 128
 
 template <class Taxis, class T>
-void fetch_data(hls::stream<Taxis> &resstream, const uint256_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched2, hls::stream<bool> &done) {
-	bool aligned=false;
+void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize, const keep_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched_keep) {
 
-	read: while (true) {
+	totalcapcount_t _capturesize=capturesize;
+	keep_t _keep=keep;
+
+	read: for(int i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=1
-		if(resstream.empty()) {
-			done.write(true);
-			break;
-		}
 		Taxis resin=resstream.read();
-		if (resin.user==0 || aligned) {
-			fetched.write(resin.data);
-			fetched2.write(keep[resin.user]);
-			done.write(false);
-			aligned=true;
-		}
+		fetched.write(resin.data);
+		fetched_keep.write(_keep[resin.user]);
 	}
 }
 
 template <class T>
-void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched2, hls::stream<bool> &done, hls::stream<T> &forwarded, hls::stream<capcount_t> &captured, hls::stream<bool> &done2){
-	capcount_t _captured=0;
-	forward: while(!done.read()){
+void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, const totalcapcount_t capturesize, hls::stream<T> &forwarded){
+	totalcapcount_t _capturesize=capturesize;
+	forward: for(int i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=1
 		T out=fetched.read();
-		bool use=fetched2.read();
+		bool use=fetched_keep.read();
 		if (use){
 			forwarded.write(out);
-			captured.write(_captured);
-			done2.write(false);
-			_captured++;
 		}
-	}
-	done2.write(true);
-}
-
-template <class T>
-void done_detect(hls::stream<T> &forwarded, hls::stream<capcount_t> &captured, hls::stream<bool> &donein, capcount_t const capturesize, hls::stream<T> &toout, hls::stream<bool> &done){
-	bool _done=false;
-	forward: while(!donein.read()){
-#pragma HLS PIPELINE II=1
-		uint256_t out = forwarded.read();
-		capcount_t _captured=captured.read();
-		if (!_done) {
-			_done = _captured==capturesize-1;
-			toout.write(out);
-			done.write(_done);
-		}
-	}
-	if (!_done) {
-		_done = true;
-		toout.write(0);
-		done.write(true);
 	}
 }
 
+
+
 template <class T>
-void put_data(hls::stream<T> &toout, hls::stream<bool> &done, T *iqout){
+void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqout){
 	T* out_addr=(T*) iqout;
-
-	put: while(true) {
-		bool _done=false;
-//		T tmp[128];
-		write: for(int i=0;i<BURST_LEN;i++) {
+	capcount_t _capturesize=capturesize;
+	write: for(int i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=1
-			T out;
-			if (_done) {
-				out=0;
-			} else {
-				out = toout.read();
-				_done = done.read();
-			}
-//			tmp[i]=out;
-			*(out_addr+i)=out;
-		}
-//		memcpy(out_addr, tmp,  128*32);
-
-		out_addr+=BURST_LEN;
-		if(_done) break;
+		out_addr[i]=toout.read();
 	}
 }
 
@@ -126,32 +82,27 @@ void put_data(hls::stream<T> &toout, hls::stream<bool> &done, T *iqout){
 //	put_data<T>(toout, last, out);
 //}
 
-void iq_capture(hls::stream<resstream_t> &resstream, uint256_t keep, capcount_t capturesize, uint256_t *iqout) {
+void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_t total_capturesize, capcount_t capturesize, uint256_t *iqout) {
+//total_capturesize must be the number of samples to ingest to capture capturesize samples given keep. bitsum(keep) uint256_t are captured per group of 256 inbound samples
+//total_capturesize=(256-bitsum(keep)+1)*capturesize
 #pragma HLS DATAFLOW
 #pragma HLS INTERFACE axis register port=resstream depth=2048
-#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=1000 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1
+#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=8
 #pragma HLS INTERFACE s_axilite port=iqout bundle=control
 #pragma HLS INTERFACE s_axilite port=keep bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=total_capturesize bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-	hls::stream<uint256_t> fetched("fetch"), forwarded("fwd"), toout("toout");
-	hls::stream<bool> fetched2("fetch2"), done("done"), done2("done2"), last("last");
-	hls::stream<capcount_t> captured("cap");
-#pragma HLS STREAM variable=fetched depth=3
-#pragma HLS STREAM variable=forwarded depth=3
-#pragma HLS STREAM variable=fetched2 depth=3
-#pragma HLS STREAM variable=done depth=3
-#pragma HLS STREAM variable=done2 depth=3
-#pragma HLS STREAM variable=captured depth=3
+	hls::stream<uint256_t> fetched("fetch"), toout("toout");
+	hls::stream<bool> fetched_keep("fetch2");
+//#pragma HLS STREAM variable=fetched depth=3
+#pragma HLS STREAM variable=fetched_keep depth=2
+//#pragma HLS STREAM variable=tout depth=512
 
-#pragma HLS STREAM variable=last depth=512
-#pragma HLS STREAM variable=tout depth=512
-
-	fetch_data<resstream_t, uint256_t>(resstream, keep, fetched, fetched2, done);
-	capture_data<uint256_t>(fetched, fetched2, done, forwarded, captured, done2);
-	done_detect<uint256_t>(forwarded, captured, done2, capturesize, toout, last);
-	put_data<uint256_t>(toout, last, iqout);
+	fetch_data<resstream_t, uint256_t>(resstream, total_capturesize, keep, fetched, fetched_keep);
+	capture_data<uint256_t>(fetched, fetched_keep, total_capturesize, toout);
+	put_data_csize<uint256_t>(toout, capturesize, iqout);
 }
 
 
@@ -193,24 +144,6 @@ uint256_t pair_iq(const uint128_t i_in, const uint128_t q_in) {
 	return tmp;
 }
 
-void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *iqout) {
-#pragma HLS INTERFACE axis register port=istream depth=2048
-#pragma HLS INTERFACE axis register port=qstream depth=2048
-#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=1000 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1
-#pragma HLS INTERFACE s_axilite port=iqout bundle=control
-#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
-
-	uint256_t* out_addr=iqout;
-	capcount_t _capturesize=capturesize;
-	out: for (int i=0;i< _capturesize; i++) {
-#pragma HLS PIPELINE II=1
-		uint128_t i_in = istream.read();
-		uint128_t q_in = qstream.read();
-		out_addr[i]=pair_iq(i_in, q_in);
-	}
-
-}
 
 
 void pair_iq_df(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in, const capcount_t capturesize, hls::stream<uint256_t> &out) {
@@ -223,16 +156,7 @@ void pair_iq_df(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in, cons
 }
 
 
-template <class T>
-void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqout){
-	T* out_addr=(T*) iqout;
-	capcount_t _capturesize=capturesize;
-	bool _done=false;
-	write: for(int i=0;i<_capturesize;i++) {
-#pragma HLS PIPELINE II=1
-		out_addr[i]=toout.read();
-	}
-}
+
 
 template <class T>
 void put_data_csize_2buf(hls::stream<T> &toout, const capcount_t capturesize, T *iqout){
@@ -272,7 +196,7 @@ void sendData (uint256_t *m_axi, uint256_t *dataOut, int row, bool enable) {
 }
 
 
-void adc_capture_df(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *iqout) {
+void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *iqout) {
 #pragma HLS DATAFLOW
 #pragma HLS INTERFACE axis register port=istream depth=2048
 #pragma HLS INTERFACE axis register port=qstream depth=2048
