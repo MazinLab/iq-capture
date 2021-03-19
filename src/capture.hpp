@@ -8,7 +8,7 @@
  * Phase Stream is 512M*8B ~4 GB/s (4 phase 2 bytes @ 512MHz)
 */
 #include "ap_int.h"
-#include "axi.h"
+#include "ap_axi_sdata.h"
 #include "hls_stream.h"
 #include <ap_utils.h>
 
@@ -31,7 +31,7 @@ typedef ap_uint<128> uint128_t;
 
 
 typedef ap_axiu<N_IQ*32,8,0,0> resstream_t;
-typedef ap_axiu<N_PHASE*16,9,0,0> phasestream_t;
+typedef ap_axiu<N_PHASE*16,16,0,0> phasestream_t;
 
 void iq_capture(hls::stream<resstream_t> &resstream, uint256_t keep, totalcapcount_t total_capturesize, capcount_t capturesize, uint256_t *out);
 void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *out);
