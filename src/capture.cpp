@@ -60,18 +60,6 @@ void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqou
 	}
 }
 
-template <class T>
-void put_data_csize(volatile T toout[], const capcount_t capturesize, T *iqout){
-	T* out_addr=(T*) iqout;
-	capcount_t _capturesize=capturesize;
-	write: for(int i=0;i<_capturesize;i+=1) {
-#pragma HLS PIPELINE II=burst_len
-//		memcpy((uint256_t *)(iqout+i), toout, BURST_LEN*sizeof(uint256_t));
-		out_addr[i]=toout[i];
-	}
-}
-
-
 
 uint256_t pair_iq(const uint128_t i_in, const uint128_t q_in) {
 #pragma HLS PIPELINE II=1
@@ -151,8 +139,7 @@ void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstrea
 #pragma HLS DATAFLOW
 #pragma HLS INTERFACE axis register port=istream depth=2048
 #pragma HLS INTERFACE axis register port=qstream depth=2048
-#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 \\
-	max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=2
+#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=2
 #pragma HLS INTERFACE s_axilite port=iqout bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control

@@ -140,8 +140,8 @@ int main (void){
 	ap_uint<256> out[OUT_BUF_SIZE];
 	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
 
-	fail|=drive_iq(out, 8);
-//	fail|=drive_adc(1500, out, 1399);
+	//fail|=drive_iq(out, 8);
+	fail|=drive_adc(1500, out, 1399);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
