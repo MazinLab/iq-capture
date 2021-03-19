@@ -1304,7 +1304,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>24d277cf</spirit:value>
+            <spirit:value>4624fab0</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1320,7 +1320,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>0df97ebd</spirit:value>
+            <spirit:value>6f0ff3c2</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1336,7 +1336,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>e6e4e1a3</spirit:value>
+            <spirit:value>b99f0774</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1352,7 +1352,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>d7a4aa8f</spirit:value>
+            <spirit:value>88df4c58</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -2737,7 +2737,7 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/iq_capture_fifo_w1_d1_S.v</spirit:name>
+        <spirit:name>hdl/verilog/iq_capture_fifo_w1_d2_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2799,7 +2799,7 @@
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/iq_capture_fifo_w1_d1_S.v</spirit:name>
+        <spirit:name>hdl/verilog/iq_capture_fifo_w1_d2_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -2874,7 +2874,7 @@
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/iq_capture_fifo_w1_d1_S.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/iq_capture_fifo_w1_d2_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2916,7 +2916,7 @@
       <spirit:file>
         <spirit:name>hdl/vhdl/iq_capture.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_765306b9</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_6fda406d</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -2937,7 +2937,7 @@
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/iq_capture_fifo_w1_d1_S.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/iq_capture_fifo_w1_d2_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -3066,7 +3066,7 @@
       </spirit:file>
     </spirit:fileSet>
   </spirit:fileSets>
-  <spirit:description>IQ Capture 4096byte</spirit:description>
+  <spirit:description>IQ Capture</spirit:description>
   <spirit:parameters>
     <spirit:parameter>
       <spirit:name>C_M_AXI_GMEM_ENABLE_ID_PORTS</spirit:name>
@@ -3212,8 +3212,8 @@
       </xilinx:taxonomies>
       <xilinx:displayName>IQ Capture</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2103191245</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2021-03-19T19:45:44Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2103191446</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2021-03-19T21:47:03Z</xilinx:coreCreationDateTime>
       <xilinx:sdxKernelAttributes>
         <xilinx:sdx_kernel>true</xilinx:sdx_kernel>
         <xilinx:sdx_kernel_type>hls</xilinx:sdx_kernel_type>
@@ -3224,7 +3224,7 @@
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="91096429"/>
       <xilinx:checksum xilinx:scope="addressSpaces" xilinx:value="5791c22f"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="781ba6f3"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="923d7a66"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="2acece36"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="c55f806f"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="5d3449cc"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="12547004"/>

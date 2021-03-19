@@ -594,7 +594,7 @@ iq_capture_fifo_w256_d2_S fetched_U(
     .if_read(capture_data_ap_uint_256_U0_fetched_read)
 );
 
-iq_capture_fifo_w1_d1_S fetched_keep_U(
+iq_capture_fifo_w1_d2_S fetched_keep_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),

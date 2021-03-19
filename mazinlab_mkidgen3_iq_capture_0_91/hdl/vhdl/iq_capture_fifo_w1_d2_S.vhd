@@ -7,20 +7,20 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
-entity iq_capture_fifo_w1_d1_S_shiftReg is
+entity iq_capture_fifo_w1_d2_S_shiftReg is
     generic (
         DATA_WIDTH : integer := 1;
         ADDR_WIDTH : integer := 1;
-        DEPTH : integer := 1);
+        DEPTH : integer := 2);
     port (
         clk : in std_logic;
         data : in std_logic_vector(DATA_WIDTH-1 downto 0);
         ce : in std_logic;
         a : in std_logic_vector(ADDR_WIDTH-1 downto 0);
         q : out std_logic_vector(DATA_WIDTH-1 downto 0));
-end iq_capture_fifo_w1_d1_S_shiftReg;
+end iq_capture_fifo_w1_d2_S_shiftReg;
 
-architecture rtl of iq_capture_fifo_w1_d1_S_shiftReg is
+architecture rtl of iq_capture_fifo_w1_d2_S_shiftReg is
 --constant DEPTH_WIDTH: integer := 16;
 type SRL_ARRAY is array (0 to DEPTH-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
 signal SRL_SIG : SRL_ARRAY;
@@ -44,12 +44,12 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
 
-entity iq_capture_fifo_w1_d1_S is 
+entity iq_capture_fifo_w1_d2_S is 
     generic (
         MEM_STYLE  : string := "shiftreg"; 
         DATA_WIDTH : integer := 1;
         ADDR_WIDTH : integer := 1;
-        DEPTH : integer := 1);
+        DEPTH : integer := 2);
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
@@ -63,13 +63,13 @@ entity iq_capture_fifo_w1_d1_S is
         if_din : IN STD_LOGIC_VECTOR(DATA_WIDTH - 1 downto 0));
 end entity;
 
-architecture rtl of iq_capture_fifo_w1_d1_S is
+architecture rtl of iq_capture_fifo_w1_d2_S is
 
-    component iq_capture_fifo_w1_d1_S_shiftReg is
+    component iq_capture_fifo_w1_d2_S_shiftReg is
     generic (
         DATA_WIDTH : integer := 1;
         ADDR_WIDTH : integer := 1;
-        DEPTH : integer := 1);
+        DEPTH : integer := 2);
     port (
         clk : in std_logic;
         data : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -121,7 +121,7 @@ begin
     shiftReg_addr <= (others => '0') when mOutPtr(ADDR_WIDTH) = '1' else mOutPtr(ADDR_WIDTH-1 downto 0);
     shiftReg_ce <= (if_write and if_write_ce) and internal_full_n;
 
-    U_iq_capture_fifo_w1_d1_S_shiftReg : iq_capture_fifo_w1_d1_S_shiftReg
+    U_iq_capture_fifo_w1_d2_S_shiftReg : iq_capture_fifo_w1_d2_S_shiftReg
     generic map (
         DATA_WIDTH => DATA_WIDTH,
         ADDR_WIDTH => ADDR_WIDTH,

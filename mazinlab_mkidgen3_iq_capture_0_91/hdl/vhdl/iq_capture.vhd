@@ -400,7 +400,7 @@ architecture behav of iq_capture is
     end component;
 
 
-    component iq_capture_fifo_w1_d1_S IS
+    component iq_capture_fifo_w1_d2_S IS
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
@@ -934,7 +934,7 @@ begin
         if_empty_n => fetched_empty_n,
         if_read => capture_data_ap_uint_256_U0_fetched_read);
 
-    fetched_keep_U : component iq_capture_fifo_w1_d1_S
+    fetched_keep_U : component iq_capture_fifo_w1_d2_S
     port map (
         clk => ap_clk,
         reset => ap_rst_n_inv,

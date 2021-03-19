@@ -160,7 +160,7 @@ void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_
 				capcount_t capturesize, uint256_t *iqout) {
 #pragma HLS DATAFLOW
 #pragma HLS INTERFACE axis register port=resstream depth=2048
-#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=8
+#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=4
 #pragma HLS INTERFACE s_axilite port=iqout bundle=control
 #pragma HLS INTERFACE s_axilite port=keep bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
@@ -169,6 +169,8 @@ void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_
 
 	hls::stream<uint256_t> fetched("fetch"), toout("toout");
 	hls::stream<bool> fetched_keep("fetch2");
+#pragma HLS STREAM variable=fetched_keep depth=2 dim=1
+
 
 	fetch_data<resstream_t, uint256_t>(resstream, total_capturesize, keep, fetched, fetched_keep);
 	capture_data<uint256_t>(fetched, fetched_keep, total_capturesize, toout);
