@@ -142,7 +142,7 @@ void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstrea
 #pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=2
 #pragma HLS INTERFACE s_axilite port=iqout bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control clock=axi_clk
+#pragma HLS INTERFACE s_axilite port=return bundle=control
 
 	hls::stream<uint256_t> iq_in("fetch");
 #pragma HLS STREAM variable=iq_in depth=4
@@ -166,7 +166,7 @@ void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_
 #pragma HLS INTERFACE s_axilite port=keep bundle=control
 #pragma HLS INTERFACE s_axilite port=capturesize bundle=control
 #pragma HLS INTERFACE s_axilite port=total_capturesize bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control clock=axi_clk
+#pragma HLS INTERFACE s_axilite port=return bundle=control
 
 	hls::stream<uint256_t> fetched("fetch"), toout("toout");
 	hls::stream<bool> fetched_keep("fetch2");
