@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps 
 
-(* CORE_GENERATION_INFO="iq_capture_iq_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.463375,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=3661,HLS_SYN_LUT=3197,HLS_VERSION=2021_1}" *)
+(* CORE_GENERATION_INFO="iq_capture_iq_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2980,HLS_SYN_LUT=3092,HLS_VERSION=2021_1}" *)
 
 module iq_capture (
 // synthesis translate_off
@@ -216,16 +216,8 @@ wire    entry_proc_U0_ap_done;
 wire    entry_proc_U0_ap_continue;
 wire    entry_proc_U0_ap_idle;
 wire    entry_proc_U0_ap_ready;
-wire   [26:0] entry_proc_U0_ap_return_0;
-wire   [63:0] entry_proc_U0_ap_return_1;
-wire    ap_channel_done_iqout_c_channel;
+wire   [63:0] entry_proc_U0_ap_return;
 wire    iqout_c_channel_full_n;
-reg    ap_sync_reg_channel_write_iqout_c_channel;
-wire    ap_sync_channel_write_iqout_c_channel;
-wire    ap_channel_done_capturesize_c_channel;
-wire    capturesize_c_channel_full_n;
-reg    ap_sync_reg_channel_write_capturesize_c_channel;
-wire    ap_sync_channel_write_capturesize_c_channel;
 wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_start;
 wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_done;
 wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_continue;
@@ -238,8 +230,6 @@ wire   [255:0] fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched16_
 wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched16_write;
 wire   [0:0] fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_din;
 wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write;
-wire   [34:0] fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din;
-wire    fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write;
 wire    capture_data_ap_uint_256_U0_ap_start;
 wire    capture_data_ap_uint_256_U0_ap_done;
 wire    capture_data_ap_uint_256_U0_ap_continue;
@@ -247,7 +237,6 @@ wire    capture_data_ap_uint_256_U0_ap_idle;
 wire    capture_data_ap_uint_256_U0_ap_ready;
 wire    capture_data_ap_uint_256_U0_fetched16_read;
 wire    capture_data_ap_uint_256_U0_fetched_keep18_read;
-wire    capture_data_ap_uint_256_U0_capturesize_read;
 wire   [255:0] capture_data_ap_uint_256_U0_toout17_din;
 wire    capture_data_ap_uint_256_U0_toout17_write;
 wire    put_data_csize_ap_uint_256_U0_ap_start;
@@ -288,8 +277,6 @@ wire   [3:0] put_data_csize_ap_uint_256_U0_m_axi_gmem_ARREGION;
 wire   [0:0] put_data_csize_ap_uint_256_U0_m_axi_gmem_ARUSER;
 wire    put_data_csize_ap_uint_256_U0_m_axi_gmem_RREADY;
 wire    put_data_csize_ap_uint_256_U0_m_axi_gmem_BREADY;
-wire   [26:0] capturesize_c_channel_dout;
-wire    capturesize_c_channel_empty_n;
 wire   [63:0] iqout_c_channel_dout;
 wire    iqout_c_channel_empty_n;
 wire    fetched_full_n;
@@ -298,9 +285,6 @@ wire    fetched_empty_n;
 wire    fetched_keep_full_n;
 wire   [0:0] fetched_keep_dout;
 wire    fetched_keep_empty_n;
-wire    total_capturesize_c_full_n;
-wire   [34:0] total_capturesize_c_dout;
-wire    total_capturesize_c_empty_n;
 wire    toout_full_n;
 wire   [255:0] toout_dout;
 wire    toout_empty_n;
@@ -317,8 +301,6 @@ wire    ap_ce_reg;
 
 // power-on initialization
 initial begin
-#0 ap_sync_reg_channel_write_iqout_c_channel = 1'b0;
-#0 ap_sync_reg_channel_write_capturesize_c_channel = 1'b0;
 #0 ap_sync_reg_entry_proc_U0_ap_ready = 1'b0;
 #0 ap_sync_reg_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready = 1'b0;
 end
@@ -484,10 +466,8 @@ iq_capture_entry_proc entry_proc_U0(
     .ap_continue(entry_proc_U0_ap_continue),
     .ap_idle(entry_proc_U0_ap_idle),
     .ap_ready(entry_proc_U0_ap_ready),
-    .capturesize(capturesize),
     .iqout(iqout),
-    .ap_return_0(entry_proc_U0_ap_return_0),
-    .ap_return_1(entry_proc_U0_ap_return_1)
+    .ap_return(entry_proc_U0_ap_return)
 );
 
 iq_capture_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_s fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0(
@@ -515,10 +495,7 @@ iq_capture_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_s fetch_data_axis
     .fetched16_write(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched16_write),
     .fetched_keep18_din(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_din),
     .fetched_keep18_full_n(fetched_keep_full_n),
-    .fetched_keep18_write(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write),
-    .total_capturesize_c_din(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din),
-    .total_capturesize_c_full_n(total_capturesize_c_full_n),
-    .total_capturesize_c_write(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write)
+    .fetched_keep18_write(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write)
 );
 
 iq_capture_capture_data_ap_uint_256_s capture_data_ap_uint_256_U0(
@@ -535,9 +512,7 @@ iq_capture_capture_data_ap_uint_256_s capture_data_ap_uint_256_U0(
     .fetched_keep18_dout(fetched_keep_dout),
     .fetched_keep18_empty_n(fetched_keep_empty_n),
     .fetched_keep18_read(capture_data_ap_uint_256_U0_fetched_keep18_read),
-    .capturesize_dout(total_capturesize_c_dout),
-    .capturesize_empty_n(total_capturesize_c_empty_n),
-    .capturesize_read(capture_data_ap_uint_256_U0_capturesize_read),
+    .capturesize(total_capturesize),
     .toout17_din(capture_data_ap_uint_256_U0_toout17_din),
     .toout17_full_n(toout_full_n),
     .toout17_write(capture_data_ap_uint_256_U0_toout17_write)
@@ -554,7 +529,7 @@ iq_capture_put_data_csize_ap_uint_256_s put_data_csize_ap_uint_256_U0(
     .toout17_dout(toout_dout),
     .toout17_empty_n(toout_empty_n),
     .toout17_read(put_data_csize_ap_uint_256_U0_toout17_read),
-    .p_read(capturesize_c_channel_dout),
+    .capturesize(capturesize),
     .m_axi_gmem_AWVALID(put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID),
     .m_axi_gmem_AWREADY(gmem_AWREADY),
     .m_axi_gmem_AWADDR(put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR),
@@ -600,20 +575,7 @@ iq_capture_put_data_csize_ap_uint_256_s put_data_csize_ap_uint_256_U0(
     .m_axi_gmem_BRESP(gmem_BRESP),
     .m_axi_gmem_BID(gmem_BID),
     .m_axi_gmem_BUSER(gmem_BUSER),
-    .p_read1(iqout_c_channel_dout)
-);
-
-iq_capture_fifo_w27_d3_S capturesize_c_channel_U(
-    .clk(ap_clk),
-    .reset(ap_rst_n_inv),
-    .if_read_ce(1'b1),
-    .if_write_ce(1'b1),
-    .if_din(entry_proc_U0_ap_return_0),
-    .if_full_n(capturesize_c_channel_full_n),
-    .if_write(ap_channel_done_capturesize_c_channel),
-    .if_dout(capturesize_c_channel_dout),
-    .if_empty_n(capturesize_c_channel_empty_n),
-    .if_read(put_data_csize_ap_uint_256_U0_ap_ready)
+    .p_read(iqout_c_channel_dout)
 );
 
 iq_capture_fifo_w64_d3_S iqout_c_channel_U(
@@ -621,15 +583,15 @@ iq_capture_fifo_w64_d3_S iqout_c_channel_U(
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
     .if_write_ce(1'b1),
-    .if_din(entry_proc_U0_ap_return_1),
+    .if_din(entry_proc_U0_ap_return),
     .if_full_n(iqout_c_channel_full_n),
-    .if_write(ap_channel_done_iqout_c_channel),
+    .if_write(entry_proc_U0_ap_done),
     .if_dout(iqout_c_channel_dout),
     .if_empty_n(iqout_c_channel_empty_n),
     .if_read(put_data_csize_ap_uint_256_U0_ap_ready)
 );
 
-iq_capture_fifo_w256_d2_S fetched_U(
+iq_capture_fifo_w256_d3_S fetched_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
@@ -642,7 +604,7 @@ iq_capture_fifo_w256_d2_S fetched_U(
     .if_read(capture_data_ap_uint_256_U0_fetched16_read)
 );
 
-iq_capture_fifo_w1_d2_S fetched_keep_U(
+iq_capture_fifo_w1_d3_S fetched_keep_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
@@ -655,20 +617,7 @@ iq_capture_fifo_w1_d2_S fetched_keep_U(
     .if_read(capture_data_ap_uint_256_U0_fetched_keep18_read)
 );
 
-iq_capture_fifo_w35_d2_S total_capturesize_c_U(
-    .clk(ap_clk),
-    .reset(ap_rst_n_inv),
-    .if_read_ce(1'b1),
-    .if_write_ce(1'b1),
-    .if_din(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din),
-    .if_full_n(total_capturesize_c_full_n),
-    .if_write(fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write),
-    .if_dout(total_capturesize_c_dout),
-    .if_empty_n(total_capturesize_c_empty_n),
-    .if_read(capture_data_ap_uint_256_U0_capturesize_read)
-);
-
-iq_capture_fifo_w256_d2_S toout_U(
+iq_capture_fifo_w256_d5_S toout_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
@@ -696,30 +645,6 @@ iq_capture_start_for_capture_data_ap_uint_256_U0 start_for_capture_data_ap_uint_
 
 always @ (posedge ap_clk) begin
     if (ap_rst_n_inv == 1'b1) begin
-        ap_sync_reg_channel_write_capturesize_c_channel <= 1'b0;
-    end else begin
-        if (((entry_proc_U0_ap_done & entry_proc_U0_ap_continue) == 1'b1)) begin
-            ap_sync_reg_channel_write_capturesize_c_channel <= 1'b0;
-        end else begin
-            ap_sync_reg_channel_write_capturesize_c_channel <= ap_sync_channel_write_capturesize_c_channel;
-        end
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (ap_rst_n_inv == 1'b1) begin
-        ap_sync_reg_channel_write_iqout_c_channel <= 1'b0;
-    end else begin
-        if (((entry_proc_U0_ap_done & entry_proc_U0_ap_continue) == 1'b1)) begin
-            ap_sync_reg_channel_write_iqout_c_channel <= 1'b0;
-        end else begin
-            ap_sync_reg_channel_write_iqout_c_channel <= ap_sync_channel_write_iqout_c_channel;
-        end
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (ap_rst_n_inv == 1'b1) begin
         ap_sync_reg_entry_proc_U0_ap_ready <= 1'b0;
     end else begin
         if (((ap_sync_ready & ap_start) == 1'b1)) begin
@@ -742,13 +667,9 @@ always @ (posedge ap_clk) begin
     end
 end
 
-assign ap_channel_done_capturesize_c_channel = ((ap_sync_reg_channel_write_capturesize_c_channel ^ 1'b1) & entry_proc_U0_ap_done);
-
-assign ap_channel_done_iqout_c_channel = ((ap_sync_reg_channel_write_iqout_c_channel ^ 1'b1) & entry_proc_U0_ap_done);
-
 assign ap_done = put_data_csize_ap_uint_256_U0_ap_done;
 
-assign ap_idle = (put_data_csize_ap_uint_256_U0_ap_idle & fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_idle & (iqout_c_channel_empty_n ^ 1'b1) & (capturesize_c_channel_empty_n ^ 1'b1) & entry_proc_U0_ap_idle & capture_data_ap_uint_256_U0_ap_idle);
+assign ap_idle = (put_data_csize_ap_uint_256_U0_ap_idle & fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_idle & (iqout_c_channel_empty_n ^ 1'b1) & entry_proc_U0_ap_idle & capture_data_ap_uint_256_U0_ap_idle);
 
 assign ap_ready = ap_sync_ready;
 
@@ -760,10 +681,6 @@ always @ (*) begin
     ap_rst_n_inv = ~ap_rst_n;
 end
 
-assign ap_sync_channel_write_capturesize_c_channel = ((capturesize_c_channel_full_n & ap_channel_done_capturesize_c_channel) | ap_sync_reg_channel_write_capturesize_c_channel);
-
-assign ap_sync_channel_write_iqout_c_channel = ((iqout_c_channel_full_n & ap_channel_done_iqout_c_channel) | ap_sync_reg_channel_write_iqout_c_channel);
-
 assign ap_sync_entry_proc_U0_ap_ready = (entry_proc_U0_ap_ready | ap_sync_reg_entry_proc_U0_ap_ready);
 
 assign ap_sync_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready = (fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready | ap_sync_reg_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready);
@@ -774,7 +691,7 @@ assign capture_data_ap_uint_256_U0_ap_continue = 1'b1;
 
 assign capture_data_ap_uint_256_U0_ap_start = start_for_capture_data_ap_uint_256_U0_empty_n;
 
-assign entry_proc_U0_ap_continue = (ap_sync_channel_write_iqout_c_channel & ap_sync_channel_write_capturesize_c_channel);
+assign entry_proc_U0_ap_continue = iqout_c_channel_full_n;
 
 assign entry_proc_U0_ap_start = ((ap_sync_reg_entry_proc_U0_ap_ready ^ 1'b1) & ap_start);
 
@@ -784,7 +701,7 @@ assign fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_start = ((ap_sy
 
 assign put_data_csize_ap_uint_256_U0_ap_continue = 1'b1;
 
-assign put_data_csize_ap_uint_256_U0_ap_start = (iqout_c_channel_empty_n & capturesize_c_channel_empty_n);
+assign put_data_csize_ap_uint_256_U0_ap_start = iqout_c_channel_empty_n;
 
 assign resstream_TREADY = fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_resstream_TREADY;
 

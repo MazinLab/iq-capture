@@ -105,7 +105,7 @@ end;
 architecture behav of iq_capture is 
     attribute CORE_GENERATION_INFO : STRING;
     attribute CORE_GENERATION_INFO of behav : architecture is
-    "iq_capture_iq_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.463375,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=3661,HLS_SYN_LUT=3197,HLS_VERSION=2021_1}";
+    "iq_capture_iq_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2980,HLS_SYN_LUT=3092,HLS_VERSION=2021_1}";
     constant C_S_AXI_DATA_WIDTH : INTEGER range 63 downto 0 := 20;
     constant ap_const_logic_1 : STD_LOGIC := '1';
     constant C_M_AXI_DATA_WIDTH : INTEGER range 63 downto 0 := 20;
@@ -147,16 +147,8 @@ architecture behav of iq_capture is
     signal entry_proc_U0_ap_continue : STD_LOGIC;
     signal entry_proc_U0_ap_idle : STD_LOGIC;
     signal entry_proc_U0_ap_ready : STD_LOGIC;
-    signal entry_proc_U0_ap_return_0 : STD_LOGIC_VECTOR (26 downto 0);
-    signal entry_proc_U0_ap_return_1 : STD_LOGIC_VECTOR (63 downto 0);
-    signal ap_channel_done_iqout_c_channel : STD_LOGIC;
+    signal entry_proc_U0_ap_return : STD_LOGIC_VECTOR (63 downto 0);
     signal iqout_c_channel_full_n : STD_LOGIC;
-    signal ap_sync_reg_channel_write_iqout_c_channel : STD_LOGIC := '0';
-    signal ap_sync_channel_write_iqout_c_channel : STD_LOGIC;
-    signal ap_channel_done_capturesize_c_channel : STD_LOGIC;
-    signal capturesize_c_channel_full_n : STD_LOGIC;
-    signal ap_sync_reg_channel_write_capturesize_c_channel : STD_LOGIC := '0';
-    signal ap_sync_channel_write_capturesize_c_channel : STD_LOGIC;
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_start : STD_LOGIC;
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_done : STD_LOGIC;
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_continue : STD_LOGIC;
@@ -169,8 +161,6 @@ architecture behav of iq_capture is
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched16_write : STD_LOGIC;
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_din : STD_LOGIC_VECTOR (0 downto 0);
     signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write : STD_LOGIC;
-    signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din : STD_LOGIC_VECTOR (34 downto 0);
-    signal fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_ap_start : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_ap_done : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_ap_continue : STD_LOGIC;
@@ -178,7 +168,6 @@ architecture behav of iq_capture is
     signal capture_data_ap_uint_256_U0_ap_ready : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_fetched16_read : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_fetched_keep18_read : STD_LOGIC;
-    signal capture_data_ap_uint_256_U0_capturesize_read : STD_LOGIC;
     signal capture_data_ap_uint_256_U0_toout17_din : STD_LOGIC_VECTOR (255 downto 0);
     signal capture_data_ap_uint_256_U0_toout17_write : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_start : STD_LOGIC;
@@ -219,8 +208,6 @@ architecture behav of iq_capture is
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_ARUSER : STD_LOGIC_VECTOR (0 downto 0);
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_RREADY : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_BREADY : STD_LOGIC;
-    signal capturesize_c_channel_dout : STD_LOGIC_VECTOR (26 downto 0);
-    signal capturesize_c_channel_empty_n : STD_LOGIC;
     signal iqout_c_channel_dout : STD_LOGIC_VECTOR (63 downto 0);
     signal iqout_c_channel_empty_n : STD_LOGIC;
     signal fetched_full_n : STD_LOGIC;
@@ -229,9 +216,6 @@ architecture behav of iq_capture is
     signal fetched_keep_full_n : STD_LOGIC;
     signal fetched_keep_dout : STD_LOGIC_VECTOR (0 downto 0);
     signal fetched_keep_empty_n : STD_LOGIC;
-    signal total_capturesize_c_full_n : STD_LOGIC;
-    signal total_capturesize_c_dout : STD_LOGIC_VECTOR (34 downto 0);
-    signal total_capturesize_c_empty_n : STD_LOGIC;
     signal toout_full_n : STD_LOGIC;
     signal toout_dout : STD_LOGIC_VECTOR (255 downto 0);
     signal toout_empty_n : STD_LOGIC;
@@ -255,10 +239,8 @@ architecture behav of iq_capture is
         ap_continue : IN STD_LOGIC;
         ap_idle : OUT STD_LOGIC;
         ap_ready : OUT STD_LOGIC;
-        capturesize : IN STD_LOGIC_VECTOR (26 downto 0);
         iqout : IN STD_LOGIC_VECTOR (63 downto 0);
-        ap_return_0 : OUT STD_LOGIC_VECTOR (26 downto 0);
-        ap_return_1 : OUT STD_LOGIC_VECTOR (63 downto 0) );
+        ap_return : OUT STD_LOGIC_VECTOR (63 downto 0) );
     end component;
 
 
@@ -288,10 +270,7 @@ architecture behav of iq_capture is
         fetched16_write : OUT STD_LOGIC;
         fetched_keep18_din : OUT STD_LOGIC_VECTOR (0 downto 0);
         fetched_keep18_full_n : IN STD_LOGIC;
-        fetched_keep18_write : OUT STD_LOGIC;
-        total_capturesize_c_din : OUT STD_LOGIC_VECTOR (34 downto 0);
-        total_capturesize_c_full_n : IN STD_LOGIC;
-        total_capturesize_c_write : OUT STD_LOGIC );
+        fetched_keep18_write : OUT STD_LOGIC );
     end component;
 
 
@@ -310,9 +289,7 @@ architecture behav of iq_capture is
         fetched_keep18_dout : IN STD_LOGIC_VECTOR (0 downto 0);
         fetched_keep18_empty_n : IN STD_LOGIC;
         fetched_keep18_read : OUT STD_LOGIC;
-        capturesize_dout : IN STD_LOGIC_VECTOR (34 downto 0);
-        capturesize_empty_n : IN STD_LOGIC;
-        capturesize_read : OUT STD_LOGIC;
+        capturesize : IN STD_LOGIC_VECTOR (34 downto 0);
         toout17_din : OUT STD_LOGIC_VECTOR (255 downto 0);
         toout17_full_n : IN STD_LOGIC;
         toout17_write : OUT STD_LOGIC );
@@ -331,7 +308,7 @@ architecture behav of iq_capture is
         toout17_dout : IN STD_LOGIC_VECTOR (255 downto 0);
         toout17_empty_n : IN STD_LOGIC;
         toout17_read : OUT STD_LOGIC;
-        p_read : IN STD_LOGIC_VECTOR (26 downto 0);
+        capturesize : IN STD_LOGIC_VECTOR (26 downto 0);
         m_axi_gmem_AWVALID : OUT STD_LOGIC;
         m_axi_gmem_AWREADY : IN STD_LOGIC;
         m_axi_gmem_AWADDR : OUT STD_LOGIC_VECTOR (63 downto 0);
@@ -377,22 +354,7 @@ architecture behav of iq_capture is
         m_axi_gmem_BRESP : IN STD_LOGIC_VECTOR (1 downto 0);
         m_axi_gmem_BID : IN STD_LOGIC_VECTOR (0 downto 0);
         m_axi_gmem_BUSER : IN STD_LOGIC_VECTOR (0 downto 0);
-        p_read1 : IN STD_LOGIC_VECTOR (63 downto 0) );
-    end component;
-
-
-    component iq_capture_fifo_w27_d3_S IS
-    port (
-        clk : IN STD_LOGIC;
-        reset : IN STD_LOGIC;
-        if_read_ce : IN STD_LOGIC;
-        if_write_ce : IN STD_LOGIC;
-        if_din : IN STD_LOGIC_VECTOR (26 downto 0);
-        if_full_n : OUT STD_LOGIC;
-        if_write : IN STD_LOGIC;
-        if_dout : OUT STD_LOGIC_VECTOR (26 downto 0);
-        if_empty_n : OUT STD_LOGIC;
-        if_read : IN STD_LOGIC );
+        p_read : IN STD_LOGIC_VECTOR (63 downto 0) );
     end component;
 
 
@@ -411,7 +373,7 @@ architecture behav of iq_capture is
     end component;
 
 
-    component iq_capture_fifo_w256_d2_S IS
+    component iq_capture_fifo_w256_d3_S IS
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
@@ -426,7 +388,7 @@ architecture behav of iq_capture is
     end component;
 
 
-    component iq_capture_fifo_w1_d2_S IS
+    component iq_capture_fifo_w1_d3_S IS
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
@@ -441,16 +403,16 @@ architecture behav of iq_capture is
     end component;
 
 
-    component iq_capture_fifo_w35_d2_S IS
+    component iq_capture_fifo_w256_d5_S IS
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
         if_read_ce : IN STD_LOGIC;
         if_write_ce : IN STD_LOGIC;
-        if_din : IN STD_LOGIC_VECTOR (34 downto 0);
+        if_din : IN STD_LOGIC_VECTOR (255 downto 0);
         if_full_n : OUT STD_LOGIC;
         if_write : IN STD_LOGIC;
-        if_dout : OUT STD_LOGIC_VECTOR (34 downto 0);
+        if_dout : OUT STD_LOGIC_VECTOR (255 downto 0);
         if_empty_n : OUT STD_LOGIC;
         if_read : IN STD_LOGIC );
     end component;
@@ -792,10 +754,8 @@ begin
         ap_continue => entry_proc_U0_ap_continue,
         ap_idle => entry_proc_U0_ap_idle,
         ap_ready => entry_proc_U0_ap_ready,
-        capturesize => capturesize,
         iqout => iqout,
-        ap_return_0 => entry_proc_U0_ap_return_0,
-        ap_return_1 => entry_proc_U0_ap_return_1);
+        ap_return => entry_proc_U0_ap_return);
 
     fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0 : component iq_capture_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_s
     port map (
@@ -823,10 +783,7 @@ begin
         fetched16_write => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched16_write,
         fetched_keep18_din => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_din,
         fetched_keep18_full_n => fetched_keep_full_n,
-        fetched_keep18_write => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write,
-        total_capturesize_c_din => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din,
-        total_capturesize_c_full_n => total_capturesize_c_full_n,
-        total_capturesize_c_write => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write);
+        fetched_keep18_write => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_fetched_keep18_write);
 
     capture_data_ap_uint_256_U0 : component iq_capture_capture_data_ap_uint_256_s
     port map (
@@ -843,9 +800,7 @@ begin
         fetched_keep18_dout => fetched_keep_dout,
         fetched_keep18_empty_n => fetched_keep_empty_n,
         fetched_keep18_read => capture_data_ap_uint_256_U0_fetched_keep18_read,
-        capturesize_dout => total_capturesize_c_dout,
-        capturesize_empty_n => total_capturesize_c_empty_n,
-        capturesize_read => capture_data_ap_uint_256_U0_capturesize_read,
+        capturesize => total_capturesize,
         toout17_din => capture_data_ap_uint_256_U0_toout17_din,
         toout17_full_n => toout_full_n,
         toout17_write => capture_data_ap_uint_256_U0_toout17_write);
@@ -862,7 +817,7 @@ begin
         toout17_dout => toout_dout,
         toout17_empty_n => toout_empty_n,
         toout17_read => put_data_csize_ap_uint_256_U0_toout17_read,
-        p_read => capturesize_c_channel_dout,
+        capturesize => capturesize,
         m_axi_gmem_AWVALID => put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID,
         m_axi_gmem_AWREADY => gmem_AWREADY,
         m_axi_gmem_AWADDR => put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR,
@@ -908,20 +863,7 @@ begin
         m_axi_gmem_BRESP => gmem_BRESP,
         m_axi_gmem_BID => gmem_BID,
         m_axi_gmem_BUSER => gmem_BUSER,
-        p_read1 => iqout_c_channel_dout);
-
-    capturesize_c_channel_U : component iq_capture_fifo_w27_d3_S
-    port map (
-        clk => ap_clk,
-        reset => ap_rst_n_inv,
-        if_read_ce => ap_const_logic_1,
-        if_write_ce => ap_const_logic_1,
-        if_din => entry_proc_U0_ap_return_0,
-        if_full_n => capturesize_c_channel_full_n,
-        if_write => ap_channel_done_capturesize_c_channel,
-        if_dout => capturesize_c_channel_dout,
-        if_empty_n => capturesize_c_channel_empty_n,
-        if_read => put_data_csize_ap_uint_256_U0_ap_ready);
+        p_read => iqout_c_channel_dout);
 
     iqout_c_channel_U : component iq_capture_fifo_w64_d3_S
     port map (
@@ -929,14 +871,14 @@ begin
         reset => ap_rst_n_inv,
         if_read_ce => ap_const_logic_1,
         if_write_ce => ap_const_logic_1,
-        if_din => entry_proc_U0_ap_return_1,
+        if_din => entry_proc_U0_ap_return,
         if_full_n => iqout_c_channel_full_n,
-        if_write => ap_channel_done_iqout_c_channel,
+        if_write => entry_proc_U0_ap_done,
         if_dout => iqout_c_channel_dout,
         if_empty_n => iqout_c_channel_empty_n,
         if_read => put_data_csize_ap_uint_256_U0_ap_ready);
 
-    fetched_U : component iq_capture_fifo_w256_d2_S
+    fetched_U : component iq_capture_fifo_w256_d3_S
     port map (
         clk => ap_clk,
         reset => ap_rst_n_inv,
@@ -949,7 +891,7 @@ begin
         if_empty_n => fetched_empty_n,
         if_read => capture_data_ap_uint_256_U0_fetched16_read);
 
-    fetched_keep_U : component iq_capture_fifo_w1_d2_S
+    fetched_keep_U : component iq_capture_fifo_w1_d3_S
     port map (
         clk => ap_clk,
         reset => ap_rst_n_inv,
@@ -962,20 +904,7 @@ begin
         if_empty_n => fetched_keep_empty_n,
         if_read => capture_data_ap_uint_256_U0_fetched_keep18_read);
 
-    total_capturesize_c_U : component iq_capture_fifo_w35_d2_S
-    port map (
-        clk => ap_clk,
-        reset => ap_rst_n_inv,
-        if_read_ce => ap_const_logic_1,
-        if_write_ce => ap_const_logic_1,
-        if_din => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_din,
-        if_full_n => total_capturesize_c_full_n,
-        if_write => fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_total_capturesize_c_write,
-        if_dout => total_capturesize_c_dout,
-        if_empty_n => total_capturesize_c_empty_n,
-        if_read => capture_data_ap_uint_256_U0_capturesize_read);
-
-    toout_U : component iq_capture_fifo_w256_d2_S
+    toout_U : component iq_capture_fifo_w256_d5_S
     port map (
         clk => ap_clk,
         reset => ap_rst_n_inv,
@@ -1003,38 +932,6 @@ begin
 
 
 
-
-
-    ap_sync_reg_channel_write_capturesize_c_channel_assign_proc : process(ap_clk)
-    begin
-        if (ap_clk'event and ap_clk =  '1') then
-            if (ap_rst_n_inv = '1') then
-                ap_sync_reg_channel_write_capturesize_c_channel <= ap_const_logic_0;
-            else
-                if (((entry_proc_U0_ap_done and entry_proc_U0_ap_continue) = ap_const_logic_1)) then 
-                    ap_sync_reg_channel_write_capturesize_c_channel <= ap_const_logic_0;
-                else 
-                    ap_sync_reg_channel_write_capturesize_c_channel <= ap_sync_channel_write_capturesize_c_channel;
-                end if; 
-            end if;
-        end if;
-    end process;
-
-
-    ap_sync_reg_channel_write_iqout_c_channel_assign_proc : process(ap_clk)
-    begin
-        if (ap_clk'event and ap_clk =  '1') then
-            if (ap_rst_n_inv = '1') then
-                ap_sync_reg_channel_write_iqout_c_channel <= ap_const_logic_0;
-            else
-                if (((entry_proc_U0_ap_done and entry_proc_U0_ap_continue) = ap_const_logic_1)) then 
-                    ap_sync_reg_channel_write_iqout_c_channel <= ap_const_logic_0;
-                else 
-                    ap_sync_reg_channel_write_iqout_c_channel <= ap_sync_channel_write_iqout_c_channel;
-                end if; 
-            end if;
-        end if;
-    end process;
 
 
     ap_sync_reg_entry_proc_U0_ap_ready_assign_proc : process(ap_clk)
@@ -1068,10 +965,8 @@ begin
         end if;
     end process;
 
-    ap_channel_done_capturesize_c_channel <= ((ap_sync_reg_channel_write_capturesize_c_channel xor ap_const_logic_1) and entry_proc_U0_ap_done);
-    ap_channel_done_iqout_c_channel <= ((ap_sync_reg_channel_write_iqout_c_channel xor ap_const_logic_1) and entry_proc_U0_ap_done);
     ap_done <= put_data_csize_ap_uint_256_U0_ap_done;
-    ap_idle <= (put_data_csize_ap_uint_256_U0_ap_idle and fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_idle and (iqout_c_channel_empty_n xor ap_const_logic_1) and (capturesize_c_channel_empty_n xor ap_const_logic_1) and entry_proc_U0_ap_idle and capture_data_ap_uint_256_U0_ap_idle);
+    ap_idle <= (put_data_csize_ap_uint_256_U0_ap_idle and fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_idle and (iqout_c_channel_empty_n xor ap_const_logic_1) and entry_proc_U0_ap_idle and capture_data_ap_uint_256_U0_ap_idle);
     ap_ready <= ap_sync_ready;
 
     ap_rst_n_axi_clk_inv_assign_proc : process(ap_rst_n_axi_clk)
@@ -1085,19 +980,17 @@ begin
                 ap_rst_n_inv <= not(ap_rst_n);
     end process;
 
-    ap_sync_channel_write_capturesize_c_channel <= ((capturesize_c_channel_full_n and ap_channel_done_capturesize_c_channel) or ap_sync_reg_channel_write_capturesize_c_channel);
-    ap_sync_channel_write_iqout_c_channel <= ((iqout_c_channel_full_n and ap_channel_done_iqout_c_channel) or ap_sync_reg_channel_write_iqout_c_channel);
     ap_sync_entry_proc_U0_ap_ready <= (entry_proc_U0_ap_ready or ap_sync_reg_entry_proc_U0_ap_ready);
     ap_sync_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready <= (fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready or ap_sync_reg_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready);
     ap_sync_ready <= (ap_sync_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready and ap_sync_entry_proc_U0_ap_ready);
     capture_data_ap_uint_256_U0_ap_continue <= ap_const_logic_1;
     capture_data_ap_uint_256_U0_ap_start <= start_for_capture_data_ap_uint_256_U0_empty_n;
-    entry_proc_U0_ap_continue <= (ap_sync_channel_write_iqout_c_channel and ap_sync_channel_write_capturesize_c_channel);
+    entry_proc_U0_ap_continue <= iqout_c_channel_full_n;
     entry_proc_U0_ap_start <= ((ap_sync_reg_entry_proc_U0_ap_ready xor ap_const_logic_1) and ap_start);
     fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_continue <= ap_const_logic_1;
     fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_start <= ((ap_sync_reg_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_ap_ready xor ap_const_logic_1) and ap_start);
     put_data_csize_ap_uint_256_U0_ap_continue <= ap_const_logic_1;
-    put_data_csize_ap_uint_256_U0_ap_start <= (iqout_c_channel_empty_n and capturesize_c_channel_empty_n);
+    put_data_csize_ap_uint_256_U0_ap_start <= iqout_c_channel_empty_n;
     resstream_TREADY <= fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0_resstream_TREADY;
     start_for_capture_data_ap_uint_256_U0_din <= (0=>ap_const_logic_1, others=>'-');
 end behav;

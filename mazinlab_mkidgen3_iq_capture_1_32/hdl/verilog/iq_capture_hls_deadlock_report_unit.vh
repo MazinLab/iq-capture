@@ -243,7 +243,7 @@
                 1 : begin
                     case(index2)
                     2: begin
-                        if (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.grp_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_Pipeline_read_fu_76.fetched16_blk_n) begin
+                        if (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.fetched16_blk_n) begin
                             if (~fetched_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.fetched_U' written by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.fetched_U");
@@ -255,7 +255,7 @@
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end
-                        if (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.grp_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_Pipeline_read_fu_76.fetched_keep18_blk_n) begin
+                        if (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.fetched_keep18_blk_n) begin
                             if (~fetched_keep_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.fetched_keep_U' written by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.fetched_keep_U");
@@ -264,18 +264,6 @@
                             else if (~fetched_keep_U.if_full_n) begin
                                 $display("//      Blocked by full output FIFO 'iq_capture_iq_capture.fetched_keep_U' read by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.fetched_keep_U");
-                                $fdisplay(fp, "Dependence_Channel_status FULL");
-                            end
-                        end
-                        if (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.total_capturesize_c_blk_n) begin
-                            if (~total_capturesize_c_U.if_empty_n) begin
-                                $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.total_capturesize_c_U' written by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.total_capturesize_c_U");
-                                $fdisplay(fp, "Dependence_Channel_status EMPTY");
-                            end
-                            else if (~total_capturesize_c_U.if_full_n) begin
-                                $display("//      Blocked by full output FIFO 'iq_capture_iq_capture.total_capturesize_c_U' read by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.total_capturesize_c_U");
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end
@@ -293,7 +281,7 @@
                 2 : begin
                     case(index2)
                     1: begin
-                        if (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.fetched16_blk_n) begin
+                        if (~capture_data_ap_uint_256_U0.fetched16_blk_n) begin
                             if (~fetched_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.fetched_U' written by process 'iq_capture_iq_capture.fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.fetched_U");
@@ -305,7 +293,7 @@
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end
-                        if (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.fetched_keep18_blk_n) begin
+                        if (~capture_data_ap_uint_256_U0.fetched_keep18_blk_n) begin
                             if (~fetched_keep_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.fetched_keep_U' written by process 'iq_capture_iq_capture.fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.fetched_keep_U");
@@ -317,24 +305,12 @@
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end
-                        if (~capture_data_ap_uint_256_U0.capturesize_blk_n) begin
-                            if (~total_capturesize_c_U.if_empty_n) begin
-                                $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.total_capturesize_c_U' written by process 'iq_capture_iq_capture.fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.total_capturesize_c_U");
-                                $fdisplay(fp, "Dependence_Channel_status EMPTY");
-                            end
-                            else if (~total_capturesize_c_U.if_full_n) begin
-                                $display("//      Blocked by full output FIFO 'iq_capture_iq_capture.total_capturesize_c_U' read by process 'iq_capture_iq_capture.fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.total_capturesize_c_U");
-                                $fdisplay(fp, "Dependence_Channel_status FULL");
-                            end
-                        end
                         if (~start_for_capture_data_ap_uint_256_U0_U.if_empty_n & capture_data_ap_uint_256_U0.ap_idle & ~start_for_capture_data_ap_uint_256_U0_U.if_write) begin
                             $display("//      Blocked by missing 'ap_start' from start propagation FIFO 'iq_capture_iq_capture.start_for_capture_data_ap_uint_256_U0_U' written by process 'iq_capture_iq_capture.fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0',");
                         end
                     end
                     3: begin
-                        if (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.toout17_blk_n) begin
+                        if (~capture_data_ap_uint_256_U0.toout17_blk_n) begin
                             if (~toout_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.toout_U' written by process 'iq_capture_iq_capture.put_data_csize_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.toout_U");
@@ -352,7 +328,7 @@
                 3 : begin
                     case(index2)
                     2: begin
-                        if (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_71.toout17_blk_n) begin
+                        if (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_85.toout17_blk_n) begin
                             if (~toout_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.toout_U' written by process 'iq_capture_iq_capture.capture_data_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.toout_U");
@@ -366,18 +342,6 @@
                         end
                     end
                     0: begin
-                        if (~capturesize_c_channel_U.if_empty_n & put_data_csize_ap_uint_256_U0.ap_idle & ~capturesize_c_channel_U.if_write) begin
-                            if (~capturesize_c_channel_U.if_empty_n) begin
-                                $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.capturesize_c_channel_U' written by process 'iq_capture_iq_capture.entry_proc_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.capturesize_c_channel_U");
-                                $fdisplay(fp, "Dependence_Channel_status EMPTY");
-                            end
-                            else if (~capturesize_c_channel_U.if_full_n) begin
-                                $display("//      Blocked by full output FIFO 'iq_capture_iq_capture.capturesize_c_channel_U' read by process 'iq_capture_iq_capture.entry_proc_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path iq_capture_iq_capture.capturesize_c_channel_U");
-                                $fdisplay(fp, "Dependence_Channel_status FULL");
-                            end
-                        end
                         if (~iqout_c_channel_U.if_empty_n & put_data_csize_ap_uint_256_U0.ap_idle & ~iqout_c_channel_U.if_write) begin
                             if (~iqout_c_channel_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'iq_capture_iq_capture.iqout_c_channel_U' written by process 'iq_capture_iq_capture.entry_proc_U0'");

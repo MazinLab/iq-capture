@@ -104,7 +104,7 @@ end;
 architecture behav of adc_capture is 
     attribute CORE_GENERATION_INFO : STRING;
     attribute CORE_GENERATION_INFO of behav : architecture is
-    "adc_capture_adc_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.452688,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2163,HLS_SYN_LUT=2153,HLS_VERSION=2021_1}";
+    "adc_capture_adc_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2175,HLS_SYN_LUT=2119,HLS_VERSION=2021_1}";
     constant C_S_AXI_DATA_WIDTH : INTEGER range 63 downto 0 := 20;
     constant ap_const_logic_1 : STD_LOGIC := '1';
     constant C_M_AXI_DATA_WIDTH : INTEGER range 63 downto 0 := 20;
@@ -155,15 +155,12 @@ architecture behav of adc_capture is
     signal pair_iq_df_flat_U0_qstream_V_TREADY : STD_LOGIC;
     signal pair_iq_df_flat_U0_iq_in8_din : STD_LOGIC_VECTOR (255 downto 0);
     signal pair_iq_df_flat_U0_iq_in8_write : STD_LOGIC;
-    signal pair_iq_df_flat_U0_capturesize_c_din : STD_LOGIC_VECTOR (26 downto 0);
-    signal pair_iq_df_flat_U0_capturesize_c_write : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_start : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_done : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_continue : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_idle : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_ap_ready : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_iq_in8_read : STD_LOGIC;
-    signal put_data_csize_ap_uint_256_U0_capturesize_read : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID : STD_LOGIC;
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR : STD_LOGIC_VECTOR (63 downto 0);
     signal put_data_csize_ap_uint_256_U0_m_axi_gmem_AWID : STD_LOGIC_VECTOR (0 downto 0);
@@ -201,9 +198,6 @@ architecture behav of adc_capture is
     signal iq_in_full_n : STD_LOGIC;
     signal iq_in_dout : STD_LOGIC_VECTOR (255 downto 0);
     signal iq_in_empty_n : STD_LOGIC;
-    signal capturesize_c_full_n : STD_LOGIC;
-    signal capturesize_c_dout : STD_LOGIC_VECTOR (26 downto 0);
-    signal capturesize_c_empty_n : STD_LOGIC;
     signal ap_sync_ready : STD_LOGIC;
     signal ap_sync_reg_entry_proc_U0_ap_ready : STD_LOGIC := '0';
     signal ap_sync_entry_proc_U0_ap_ready : STD_LOGIC;
@@ -243,10 +237,7 @@ architecture behav of adc_capture is
         capturesize : IN STD_LOGIC_VECTOR (26 downto 0);
         iq_in8_din : OUT STD_LOGIC_VECTOR (255 downto 0);
         iq_in8_full_n : IN STD_LOGIC;
-        iq_in8_write : OUT STD_LOGIC;
-        capturesize_c_din : OUT STD_LOGIC_VECTOR (26 downto 0);
-        capturesize_c_full_n : IN STD_LOGIC;
-        capturesize_c_write : OUT STD_LOGIC );
+        iq_in8_write : OUT STD_LOGIC );
     end component;
 
 
@@ -262,9 +253,7 @@ architecture behav of adc_capture is
         iq_in8_dout : IN STD_LOGIC_VECTOR (255 downto 0);
         iq_in8_empty_n : IN STD_LOGIC;
         iq_in8_read : OUT STD_LOGIC;
-        capturesize_dout : IN STD_LOGIC_VECTOR (26 downto 0);
-        capturesize_empty_n : IN STD_LOGIC;
-        capturesize_read : OUT STD_LOGIC;
+        capturesize : IN STD_LOGIC_VECTOR (26 downto 0);
         m_axi_gmem_AWVALID : OUT STD_LOGIC;
         m_axi_gmem_AWREADY : IN STD_LOGIC;
         m_axi_gmem_AWADDR : OUT STD_LOGIC_VECTOR (63 downto 0);
@@ -329,7 +318,7 @@ architecture behav of adc_capture is
     end component;
 
 
-    component adc_capture_fifo_w256_d4_S IS
+    component adc_capture_fifo_w256_d8_S IS
     port (
         clk : IN STD_LOGIC;
         reset : IN STD_LOGIC;
@@ -339,21 +328,6 @@ architecture behav of adc_capture is
         if_full_n : OUT STD_LOGIC;
         if_write : IN STD_LOGIC;
         if_dout : OUT STD_LOGIC_VECTOR (255 downto 0);
-        if_empty_n : OUT STD_LOGIC;
-        if_read : IN STD_LOGIC );
-    end component;
-
-
-    component adc_capture_fifo_w27_d2_S IS
-    port (
-        clk : IN STD_LOGIC;
-        reset : IN STD_LOGIC;
-        if_read_ce : IN STD_LOGIC;
-        if_write_ce : IN STD_LOGIC;
-        if_din : IN STD_LOGIC_VECTOR (26 downto 0);
-        if_full_n : OUT STD_LOGIC;
-        if_write : IN STD_LOGIC;
-        if_dout : OUT STD_LOGIC_VECTOR (26 downto 0);
         if_empty_n : OUT STD_LOGIC;
         if_read : IN STD_LOGIC );
     end component;
@@ -697,10 +671,7 @@ begin
         capturesize => capturesize,
         iq_in8_din => pair_iq_df_flat_U0_iq_in8_din,
         iq_in8_full_n => iq_in_full_n,
-        iq_in8_write => pair_iq_df_flat_U0_iq_in8_write,
-        capturesize_c_din => pair_iq_df_flat_U0_capturesize_c_din,
-        capturesize_c_full_n => capturesize_c_full_n,
-        capturesize_c_write => pair_iq_df_flat_U0_capturesize_c_write);
+        iq_in8_write => pair_iq_df_flat_U0_iq_in8_write);
 
     put_data_csize_ap_uint_256_U0 : component adc_capture_put_data_csize_ap_uint_256_s
     port map (
@@ -714,9 +685,7 @@ begin
         iq_in8_dout => iq_in_dout,
         iq_in8_empty_n => iq_in_empty_n,
         iq_in8_read => put_data_csize_ap_uint_256_U0_iq_in8_read,
-        capturesize_dout => capturesize_c_dout,
-        capturesize_empty_n => capturesize_c_empty_n,
-        capturesize_read => put_data_csize_ap_uint_256_U0_capturesize_read,
+        capturesize => capturesize,
         m_axi_gmem_AWVALID => put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID,
         m_axi_gmem_AWREADY => gmem_AWREADY,
         m_axi_gmem_AWADDR => put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR,
@@ -777,7 +746,7 @@ begin
         if_empty_n => iqout_c_channel_empty_n,
         if_read => put_data_csize_ap_uint_256_U0_ap_ready);
 
-    iq_in_U : component adc_capture_fifo_w256_d4_S
+    iq_in_U : component adc_capture_fifo_w256_d8_S
     port map (
         clk => ap_clk,
         reset => ap_rst_n_inv,
@@ -789,19 +758,6 @@ begin
         if_dout => iq_in_dout,
         if_empty_n => iq_in_empty_n,
         if_read => put_data_csize_ap_uint_256_U0_iq_in8_read);
-
-    capturesize_c_U : component adc_capture_fifo_w27_d2_S
-    port map (
-        clk => ap_clk,
-        reset => ap_rst_n_inv,
-        if_read_ce => ap_const_logic_1,
-        if_write_ce => ap_const_logic_1,
-        if_din => pair_iq_df_flat_U0_capturesize_c_din,
-        if_full_n => capturesize_c_full_n,
-        if_write => pair_iq_df_flat_U0_capturesize_c_write,
-        if_dout => capturesize_c_dout,
-        if_empty_n => capturesize_c_empty_n,
-        if_read => put_data_csize_ap_uint_256_U0_capturesize_read);
 
 
 

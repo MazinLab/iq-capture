@@ -6,11 +6,11 @@ OPTION psf_version = 2.1;
 
 BEGIN driver iq_capture
 
- OPTION supported_peripherals = (iq_capture_v1_31 );
+ OPTION supported_peripherals = (iq_capture_v1_32 );
  OPTION driver_state = ACTIVE;
  OPTION copyfiles = all;
  OPTION name = iq_capture;
- OPTION version = 1.31;
+ OPTION version = 1.32;
 
 END driver
 

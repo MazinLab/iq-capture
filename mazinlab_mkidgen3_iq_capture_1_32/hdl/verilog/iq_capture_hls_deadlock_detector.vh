@@ -182,7 +182,7 @@ end
         .token_out_vec(token_out_vec_1),
         .dl_detect_out(dl_in_vec[1]));
 
-    assign proc_1_data_FIFO_blk[0] = 1'b0 | (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.grp_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_Pipeline_read_fu_76.fetched16_blk_n) | (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.grp_fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_Pipeline_read_fu_76.fetched_keep18_blk_n) | (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.total_capturesize_c_blk_n);
+    assign proc_1_data_FIFO_blk[0] = 1'b0 | (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.fetched16_blk_n) | (~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.fetched_keep18_blk_n);
     assign proc_1_data_PIPO_blk[0] = 1'b0;
     assign proc_1_start_FIFO_blk[0] = 1'b0 | (~start_for_capture_data_ap_uint_256_U0_U.if_full_n & fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.ap_start & ~fetch_data_axis_ap_uint_256_8ul_0ul_0ul_ap_uint_256_U0.real_start & (trans_in_cnt_0 == trans_out_cnt_0) & ~start_for_capture_data_ap_uint_256_U0_U.if_read);
     assign proc_1_TLF_FIFO_blk[0] = 1'b0;
@@ -233,14 +233,14 @@ end
         .token_out_vec(token_out_vec_2),
         .dl_detect_out(dl_in_vec[2]));
 
-    assign proc_2_data_FIFO_blk[0] = 1'b0 | (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.fetched16_blk_n) | (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.fetched_keep18_blk_n) | (~capture_data_ap_uint_256_U0.capturesize_blk_n);
+    assign proc_2_data_FIFO_blk[0] = 1'b0 | (~capture_data_ap_uint_256_U0.fetched16_blk_n) | (~capture_data_ap_uint_256_U0.fetched_keep18_blk_n);
     assign proc_2_data_PIPO_blk[0] = 1'b0;
     assign proc_2_start_FIFO_blk[0] = 1'b0 | (~start_for_capture_data_ap_uint_256_U0_U.if_empty_n & capture_data_ap_uint_256_U0.ap_idle & ~start_for_capture_data_ap_uint_256_U0_U.if_write);
     assign proc_2_TLF_FIFO_blk[0] = 1'b0;
     assign proc_2_input_sync_blk[0] = 1'b0;
     assign proc_2_output_sync_blk[0] = 1'b0;
     assign proc_dep_vld_vec_2[0] = dl_detect_out ? proc_dep_vld_vec_2_reg[0] : (proc_2_data_FIFO_blk[0] | proc_2_data_PIPO_blk[0] | proc_2_start_FIFO_blk[0] | proc_2_TLF_FIFO_blk[0] | proc_2_input_sync_blk[0] | proc_2_output_sync_blk[0]);
-    assign proc_2_data_FIFO_blk[1] = 1'b0 | (~capture_data_ap_uint_256_U0.grp_capture_data_ap_uint_256_Pipeline_forward_fu_38.toout17_blk_n);
+    assign proc_2_data_FIFO_blk[1] = 1'b0 | (~capture_data_ap_uint_256_U0.toout17_blk_n);
     assign proc_2_data_PIPO_blk[1] = 1'b0;
     assign proc_2_start_FIFO_blk[1] = 1'b0;
     assign proc_2_TLF_FIFO_blk[1] = 1'b0;
@@ -284,7 +284,7 @@ end
         .token_out_vec(token_out_vec_3),
         .dl_detect_out(dl_in_vec[3]));
 
-    assign proc_3_data_FIFO_blk[0] = 1'b0 | (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_71.toout17_blk_n);
+    assign proc_3_data_FIFO_blk[0] = 1'b0 | (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_85.toout17_blk_n);
     assign proc_3_data_PIPO_blk[0] = 1'b0;
     assign proc_3_start_FIFO_blk[0] = 1'b0;
     assign proc_3_TLF_FIFO_blk[0] = 1'b0;
@@ -294,7 +294,7 @@ end
     assign proc_3_data_FIFO_blk[1] = 1'b0;
     assign proc_3_data_PIPO_blk[1] = 1'b0;
     assign proc_3_start_FIFO_blk[1] = 1'b0;
-    assign proc_3_TLF_FIFO_blk[1] = 1'b0 | (~capturesize_c_channel_U.if_empty_n & put_data_csize_ap_uint_256_U0.ap_idle & ~capturesize_c_channel_U.if_write) | (~iqout_c_channel_U.if_empty_n & put_data_csize_ap_uint_256_U0.ap_idle & ~iqout_c_channel_U.if_write);
+    assign proc_3_TLF_FIFO_blk[1] = 1'b0 | (~iqout_c_channel_U.if_empty_n & put_data_csize_ap_uint_256_U0.ap_idle & ~iqout_c_channel_U.if_write);
     assign proc_3_input_sync_blk[1] = 1'b0;
     assign proc_3_output_sync_blk[1] = 1'b0;
     assign proc_dep_vld_vec_3[1] = dl_detect_out ? proc_dep_vld_vec_3_reg[1] : (proc_3_data_FIFO_blk[1] | proc_3_data_PIPO_blk[1] | proc_3_start_FIFO_blk[1] | proc_3_TLF_FIFO_blk[1] | proc_3_input_sync_blk[1] | proc_3_output_sync_blk[1]);

@@ -18,10 +18,8 @@ port (
     ap_continue : IN STD_LOGIC;
     ap_idle : OUT STD_LOGIC;
     ap_ready : OUT STD_LOGIC;
-    capturesize : IN STD_LOGIC_VECTOR (26 downto 0);
     iqout : IN STD_LOGIC_VECTOR (63 downto 0);
-    ap_return_0 : OUT STD_LOGIC_VECTOR (26 downto 0);
-    ap_return_1 : OUT STD_LOGIC_VECTOR (63 downto 0) );
+    ap_return : OUT STD_LOGIC_VECTOR (63 downto 0) );
 end;
 
 
@@ -43,9 +41,6 @@ attribute shreg_extract : string;
     attribute fsm_encoding of ap_CS_fsm : signal is "none";
     signal ap_CS_fsm_state1 : STD_LOGIC;
     attribute fsm_encoding of ap_CS_fsm_state1 : signal is "none";
-    signal capturesize_0_data_reg : STD_LOGIC_VECTOR (26 downto 0) := "000000000000000000000000000";
-    signal capturesize_0_vld_reg : STD_LOGIC := '0';
-    signal capturesize_0_ack_out : STD_LOGIC;
     signal iqout_0_data_reg : STD_LOGIC_VECTOR (63 downto 0) := "0000000000000000000000000000000000000000000000000000000000000000";
     signal iqout_0_vld_reg : STD_LOGIC := '0';
     signal iqout_0_ack_out : STD_LOGIC;
@@ -94,12 +89,6 @@ begin
     end process;
 
 
-    capturesize_0_vld_reg_assign_proc : process (ap_clk)
-    begin
-        if (ap_clk'event and ap_clk = '1') then
-        end if;
-    end process;
-
     iqout_0_vld_reg_assign_proc : process (ap_clk)
     begin
         if (ap_clk'event and ap_clk = '1') then
@@ -109,16 +98,7 @@ begin
     begin
         if (ap_clk'event and ap_clk = '1') then
             if ((ap_const_logic_1 = ap_CS_fsm_state2)) then
-                ap_return_0 <= capturesize_0_data_reg;
-                ap_return_1 <= iqout_0_data_reg;
-            end if;
-        end if;
-    end process;
-    process (ap_clk)
-    begin
-        if (ap_clk'event and ap_clk = '1') then
-            if (((not(((ap_start = ap_const_logic_0) and (ap_const_logic_1 = ap_CS_fsm_state1))) and (capturesize_0_ack_out = ap_const_logic_1) and (ap_const_logic_1 = ap_const_logic_1) and (capturesize_0_vld_reg = ap_const_logic_1)) or (not(((ap_start = ap_const_logic_0) and (ap_const_logic_1 = ap_CS_fsm_state1))) and (ap_const_logic_1 = ap_const_logic_1) and (capturesize_0_vld_reg = ap_const_logic_0)))) then
-                capturesize_0_data_reg <= capturesize;
+                ap_return <= iqout_0_data_reg;
             end if;
         end if;
     end process;
@@ -200,19 +180,9 @@ begin
     end process;
 
 
-    capturesize_0_ack_out_assign_proc : process(ap_CS_fsm_state2, ap_CS_fsm_state3)
-    begin
-        if (((ap_const_logic_1 = ap_CS_fsm_state2) or (ap_const_logic_1 = ap_CS_fsm_state3))) then 
-            capturesize_0_ack_out <= ap_const_logic_1;
-        else 
-            capturesize_0_ack_out <= ap_const_logic_0;
-        end if; 
-    end process;
-
-
     iqout_0_ack_out_assign_proc : process(ap_CS_fsm_state2, ap_CS_fsm_state3)
     begin
-        if (((ap_const_logic_1 = ap_CS_fsm_state2) or (ap_const_logic_1 = ap_CS_fsm_state3))) then 
+        if (((ap_const_logic_1 = ap_CS_fsm_state3) or (ap_const_logic_1 = ap_CS_fsm_state2))) then 
             iqout_0_ack_out <= ap_const_logic_1;
         else 
             iqout_0_ack_out <= ap_const_logic_0;

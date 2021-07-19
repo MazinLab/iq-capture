@@ -3,7 +3,7 @@
   <spirit:vendor>mazinlab</spirit:vendor>
   <spirit:library>mkidgen3</spirit:library>
   <spirit:name>adc_capture</spirit:name>
-  <spirit:version>1.31</spirit:version>
+  <spirit:version>1.32</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
       <spirit:name>s_axi_control</spirit:name>
@@ -1195,7 +1195,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>189e2486</spirit:value>
+            <spirit:value>5db3e8d8</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1211,7 +1211,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>55581f32</spirit:value>
+            <spirit:value>c006c23f</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1227,7 +1227,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>2f43ad3a</spirit:value>
+            <spirit:value>bef247fc</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1243,7 +1243,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>d097f7dd</spirit:value>
+            <spirit:value>cffbdc1a</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1257,7 +1257,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>e4a0d300</spirit:value>
+            <spirit:value>61cbfd73</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -2626,6 +2626,12 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
+        <spirit:name>constraints/adc_capture.xdc</spirit:name>
+        <spirit:userFileType>xdc</spirit:userFileType>
+        <spirit:userFileType>USED_IN_implementation</spirit:userFileType>
+        <spirit:userFileType>USED_IN_synthesis</spirit:userFileType>
+      </spirit:file>
+      <spirit:file>
         <spirit:name>constraints/adc_capture_ooc.xdc</spirit:name>
         <spirit:userFileType>xdc</spirit:userFileType>
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
@@ -2639,15 +2645,11 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_fifo_w27_d2_S.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_fifo_w64_d2_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_fifo_w256_d4_S.v</spirit:name>
+        <spirit:name>hdl/verilog/adc_capture_fifo_w256_d8_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2671,10 +2673,6 @@
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_hls_deadlock_idx2_monitor.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_hls_deadlock_kernel_monitor_top.vh</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
@@ -2684,10 +2682,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_pair_iq_df_flat.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_pair_iq_df_flat_Pipeline_read.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2720,17 +2714,12 @@
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_fifo_w27_d2_S.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_fifo_w64_d2_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_fifo_w256_d4_S.v</spirit:name>
+        <spirit:name>hdl/verilog/adc_capture_fifo_w256_d8_S.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -2760,11 +2749,6 @@
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_hls_deadlock_idx2_monitor.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_hls_deadlock_kernel_monitor_top.vh</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
@@ -2776,11 +2760,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/verilog/adc_capture_pair_iq_df_flat.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/verilog/adc_capture_pair_iq_df_flat_Pipeline_read.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -2808,6 +2787,12 @@
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlsynthesis_view_fileset</spirit:name>
       <spirit:file>
+        <spirit:name>constraints/adc_capture.xdc</spirit:name>
+        <spirit:userFileType>xdc</spirit:userFileType>
+        <spirit:userFileType>USED_IN_implementation</spirit:userFileType>
+        <spirit:userFileType>USED_IN_synthesis</spirit:userFileType>
+      </spirit:file>
+      <spirit:file>
         <spirit:name>constraints/adc_capture_ooc.xdc</spirit:name>
         <spirit:userFileType>xdc</spirit:userFileType>
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
@@ -2821,15 +2806,11 @@
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_fifo_w27_d2_S.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/vhdl/adc_capture_fifo_w64_d2_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_fifo_w256_d4_S.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/adc_capture_fifo_w256_d8_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2838,10 +2819,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/vhdl/adc_capture_pair_iq_df_flat.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_pair_iq_df_flat_Pipeline_read.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
       </spirit:file>
       <spirit:file>
@@ -2859,7 +2836,7 @@
       <spirit:file>
         <spirit:name>hdl/vhdl/adc_capture.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_18001481</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_69d934aa</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -2875,17 +2852,12 @@
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_fifo_w27_d2_S.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
         <spirit:name>hdl/vhdl/adc_capture_fifo_w64_d2_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_fifo_w256_d4_S.vhd</spirit:name>
+        <spirit:name>hdl/vhdl/adc_capture_fifo_w256_d8_S.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -2896,11 +2868,6 @@
       </spirit:file>
       <spirit:file>
         <spirit:name>hdl/vhdl/adc_capture_pair_iq_df_flat.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>hdl/vhdl/adc_capture_pair_iq_df_flat_Pipeline_read.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
       </spirit:file>
@@ -2928,35 +2895,35 @@
     <spirit:fileSet>
       <spirit:name>xilinx_softwaredriver_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/data/adc_capture.mdd</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/data/adc_capture.mdd</spirit:name>
         <spirit:userFileType>driver_mdd</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/data/adc_capture.tcl</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/data/adc_capture.tcl</spirit:name>
         <spirit:userFileType>driver_tcl</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/Makefile</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/Makefile</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/xadc_capture.c</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/xadc_capture.c</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/xadc_capture.h</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/xadc_capture.h</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/xadc_capture_hw.h</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/xadc_capture_hw.h</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/xadc_capture_linux.c</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/xadc_capture_linux.c</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>drivers/adc_capture_v1_31/src/xadc_capture_sinit.c</spirit:name>
+        <spirit:name>drivers/adc_capture_v1_32/src/xadc_capture_sinit.c</spirit:name>
         <spirit:userFileType>driver_src</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
@@ -2977,7 +2944,7 @@
     <spirit:fileSet>
       <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>xgui/adc_capture_v1_31.tcl</spirit:name>
+        <spirit:name>xgui/adc_capture_v1_32.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_b8a0ff94</spirit:userFileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
@@ -2992,7 +2959,7 @@
       </spirit:file>
     </spirit:fileSet>
   </spirit:fileSets>
-  <spirit:description>IQ Capture</spirit:description>
+  <spirit:description>ADC Capture</spirit:description>
   <spirit:parameters>
     <spirit:parameter>
       <spirit:name>C_M_AXI_GMEM_ENABLE_ID_PORTS</spirit:name>
@@ -3105,7 +3072,7 @@
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">adc_capture_v1_31</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">adc_capture_v1_32</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>clk_period</spirit:name>
@@ -3136,10 +3103,10 @@
       <xilinx:taxonomies>
         <xilinx:taxonomy>/VITIS_HLS_IP</xilinx:taxonomy>
       </xilinx:taxonomies>
-      <xilinx:displayName>IQ Capture</xilinx:displayName>
+      <xilinx:displayName>ADC Capture</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2107151533</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2021-07-15T22:33:20Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2107191157</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2021-07-19T18:57:41Z</xilinx:coreCreationDateTime>
       <xilinx:sdxKernelAttributes>
         <xilinx:sdx_kernel>true</xilinx:sdx_kernel>
         <xilinx:sdx_kernel_type>hls</xilinx:sdx_kernel_type>
@@ -3150,10 +3117,10 @@
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="c412f90d"/>
       <xilinx:checksum xilinx:scope="addressSpaces" xilinx:value="2c1df7e3"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="c15ad2f9"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="3d9fd147"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="39b7b76a"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="a7004e0d"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="a4923984"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="d4f958cf"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="320a9ee6"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>

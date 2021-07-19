@@ -18,9 +18,7 @@ module adc_capture_put_data_csize_ap_uint_256_s (
         iq_in8_dout,
         iq_in8_empty_n,
         iq_in8_read,
-        capturesize_dout,
-        capturesize_empty_n,
-        capturesize_read,
+        capturesize,
         m_axi_gmem_AWVALID,
         m_axi_gmem_AWREADY,
         m_axi_gmem_AWADDR,
@@ -91,9 +89,7 @@ output   ap_ready;
 input  [255:0] iq_in8_dout;
 input   iq_in8_empty_n;
 output   iq_in8_read;
-input  [26:0] capturesize_dout;
-input   capturesize_empty_n;
-output   capturesize_read;
+input  [26:0] capturesize;
 output   m_axi_gmem_AWVALID;
 input   m_axi_gmem_AWREADY;
 output  [63:0] m_axi_gmem_AWADDR;
@@ -145,7 +141,6 @@ reg ap_done;
 reg ap_idle;
 reg ap_ready;
 reg iq_in8_read;
-reg capturesize_read;
 reg m_axi_gmem_AWVALID;
 reg[63:0] m_axi_gmem_AWADDR;
 reg[0:0] m_axi_gmem_AWID;
@@ -164,62 +159,64 @@ reg m_axi_gmem_BREADY;
 reg    ap_done_reg;
 (* fsm_encoding = "none" *) reg   [10:0] ap_CS_fsm;
 wire    ap_CS_fsm_state1;
-reg    capturesize_blk_n;
 reg    gmem_blk_n_AW;
 wire    ap_CS_fsm_state3;
-reg   [0:0] icmp_ln1057_reg_124;
+wire   [0:0] icmp_ln1057_fu_107_p2;
 reg    gmem_blk_n_B;
 wire    ap_CS_fsm_state10;
-reg   [26:0] p_capturesize_V_reg_117;
-wire   [0:0] icmp_ln1057_fu_87_p2;
+wire   [27:0] sub_i_i_fu_97_p2;
 wire    ap_CS_fsm_state2;
-wire  signed [58:0] trunc_ln_fu_92_p4;
-reg   [58:0] trunc_ln_reg_128;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_done;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_idle;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_ready;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWVALID;
-wire   [63:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWADDR;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWID;
-wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLEN;
-wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWSIZE;
-wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWBURST;
-wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLOCK;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWCACHE;
-wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWPROT;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWQOS;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWREGION;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWUSER;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WVALID;
-wire   [255:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WDATA;
-wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WSTRB;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WLAST;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WID;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WUSER;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARVALID;
-wire   [63:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARADDR;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARID;
-wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARLEN;
-wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARSIZE;
-wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARBURST;
-wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARLOCK;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARCACHE;
-wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARPROT;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARQOS;
-wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARREGION;
-wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARUSER;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_RREADY;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_BREADY;
-wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_iq_in8_read;
-reg    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg;
+wire  signed [58:0] trunc_ln_fu_134_p4;
+reg   [58:0] trunc_ln_reg_174;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_done;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_idle;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_ready;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWVALID;
+wire   [63:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWADDR;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWID;
+wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLEN;
+wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWSIZE;
+wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWBURST;
+wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLOCK;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWCACHE;
+wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWPROT;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWQOS;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWREGION;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWUSER;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WVALID;
+wire   [255:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WDATA;
+wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WSTRB;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WLAST;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WID;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WUSER;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARVALID;
+wire   [63:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARADDR;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARID;
+wire   [31:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARLEN;
+wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARSIZE;
+wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARBURST;
+wire   [1:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARLOCK;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARCACHE;
+wire   [2:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARPROT;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARQOS;
+wire   [3:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARREGION;
+wire   [0:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARUSER;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_RREADY;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_BREADY;
+wire   [26:0] grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_sext_ln1057;
+wire    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_iq_in8_read;
+reg    grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg;
 wire    ap_CS_fsm_state4;
 wire    ap_CS_fsm_state5;
-wire  signed [63:0] sext_ln57_fu_102_p1;
+wire  signed [63:0] sext_ln57_fu_144_p1;
 reg    ap_block_state3_io;
-wire   [31:0] zext_ln57_fu_113_p1;
+wire   [31:0] zext_ln57_fu_129_p1;
 reg    ap_block_state10;
 reg    ap_block_state1;
+wire   [27:0] capturesize_cast_fu_93_p1;
+wire   [25:0] tmp_2_fu_112_p4;
+wire   [26:0] and_ln_fu_121_p3;
 wire    ap_CS_fsm_state11;
 reg   [10:0] ap_NS_fsm;
 reg    ap_ST_fsm_state1_blk;
@@ -239,66 +236,66 @@ wire    ap_ce_reg;
 initial begin
 #0 ap_done_reg = 1'b0;
 #0 ap_CS_fsm = 11'd1;
-#0 grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg = 1'b0;
+#0 grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg = 1'b0;
 end
 
-adc_capture_put_data_csize_ap_uint_256_Pipeline_write grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77(
+adc_capture_put_data_csize_ap_uint_256_Pipeline_write grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83(
     .ap_clk(ap_clk),
     .ap_rst(ap_rst),
-    .ap_start(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start),
-    .ap_done(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_done),
-    .ap_idle(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_idle),
-    .ap_ready(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_ready),
-    .m_axi_gmem_AWVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWVALID),
+    .ap_start(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start),
+    .ap_done(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_done),
+    .ap_idle(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_idle),
+    .ap_ready(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_ready),
+    .m_axi_gmem_AWVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWVALID),
     .m_axi_gmem_AWREADY(m_axi_gmem_AWREADY),
-    .m_axi_gmem_AWADDR(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWADDR),
-    .m_axi_gmem_AWID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWID),
-    .m_axi_gmem_AWLEN(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLEN),
-    .m_axi_gmem_AWSIZE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWSIZE),
-    .m_axi_gmem_AWBURST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWBURST),
-    .m_axi_gmem_AWLOCK(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLOCK),
-    .m_axi_gmem_AWCACHE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWCACHE),
-    .m_axi_gmem_AWPROT(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWPROT),
-    .m_axi_gmem_AWQOS(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWQOS),
-    .m_axi_gmem_AWREGION(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWREGION),
-    .m_axi_gmem_AWUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWUSER),
-    .m_axi_gmem_WVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WVALID),
+    .m_axi_gmem_AWADDR(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWADDR),
+    .m_axi_gmem_AWID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWID),
+    .m_axi_gmem_AWLEN(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLEN),
+    .m_axi_gmem_AWSIZE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWSIZE),
+    .m_axi_gmem_AWBURST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWBURST),
+    .m_axi_gmem_AWLOCK(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLOCK),
+    .m_axi_gmem_AWCACHE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWCACHE),
+    .m_axi_gmem_AWPROT(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWPROT),
+    .m_axi_gmem_AWQOS(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWQOS),
+    .m_axi_gmem_AWREGION(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWREGION),
+    .m_axi_gmem_AWUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWUSER),
+    .m_axi_gmem_WVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WVALID),
     .m_axi_gmem_WREADY(m_axi_gmem_WREADY),
-    .m_axi_gmem_WDATA(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WDATA),
-    .m_axi_gmem_WSTRB(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WSTRB),
-    .m_axi_gmem_WLAST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WLAST),
-    .m_axi_gmem_WID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WID),
-    .m_axi_gmem_WUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WUSER),
-    .m_axi_gmem_ARVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARVALID),
+    .m_axi_gmem_WDATA(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WDATA),
+    .m_axi_gmem_WSTRB(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WSTRB),
+    .m_axi_gmem_WLAST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WLAST),
+    .m_axi_gmem_WID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WID),
+    .m_axi_gmem_WUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WUSER),
+    .m_axi_gmem_ARVALID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARVALID),
     .m_axi_gmem_ARREADY(1'b0),
-    .m_axi_gmem_ARADDR(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARADDR),
-    .m_axi_gmem_ARID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARID),
-    .m_axi_gmem_ARLEN(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARLEN),
-    .m_axi_gmem_ARSIZE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARSIZE),
-    .m_axi_gmem_ARBURST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARBURST),
-    .m_axi_gmem_ARLOCK(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARLOCK),
-    .m_axi_gmem_ARCACHE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARCACHE),
-    .m_axi_gmem_ARPROT(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARPROT),
-    .m_axi_gmem_ARQOS(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARQOS),
-    .m_axi_gmem_ARREGION(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARREGION),
-    .m_axi_gmem_ARUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_ARUSER),
+    .m_axi_gmem_ARADDR(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARADDR),
+    .m_axi_gmem_ARID(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARID),
+    .m_axi_gmem_ARLEN(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARLEN),
+    .m_axi_gmem_ARSIZE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARSIZE),
+    .m_axi_gmem_ARBURST(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARBURST),
+    .m_axi_gmem_ARLOCK(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARLOCK),
+    .m_axi_gmem_ARCACHE(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARCACHE),
+    .m_axi_gmem_ARPROT(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARPROT),
+    .m_axi_gmem_ARQOS(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARQOS),
+    .m_axi_gmem_ARREGION(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARREGION),
+    .m_axi_gmem_ARUSER(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_ARUSER),
     .m_axi_gmem_RVALID(1'b0),
-    .m_axi_gmem_RREADY(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_RREADY),
+    .m_axi_gmem_RREADY(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_RREADY),
     .m_axi_gmem_RDATA(256'd0),
     .m_axi_gmem_RLAST(1'b0),
     .m_axi_gmem_RID(1'd0),
     .m_axi_gmem_RUSER(1'd0),
     .m_axi_gmem_RRESP(2'd0),
     .m_axi_gmem_BVALID(m_axi_gmem_BVALID),
-    .m_axi_gmem_BREADY(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_BREADY),
+    .m_axi_gmem_BREADY(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_BREADY),
     .m_axi_gmem_BRESP(m_axi_gmem_BRESP),
     .m_axi_gmem_BID(m_axi_gmem_BID),
     .m_axi_gmem_BUSER(m_axi_gmem_BUSER),
-    .sext_ln57(trunc_ln_reg_128),
-    .p_capturesize_V(p_capturesize_V_reg_117),
+    .sext_ln57(trunc_ln_reg_174),
+    .sext_ln1057(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_sext_ln1057),
     .iq_in8_dout(iq_in8_dout),
     .iq_in8_empty_n(iq_in8_empty_n),
-    .iq_in8_read(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_iq_in8_read)
+    .iq_in8_read(grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_iq_in8_read)
 );
 
 always @ (posedge ap_clk) begin
@@ -323,36 +320,24 @@ end
 
 always @ (posedge ap_clk) begin
     if (ap_rst == 1'b1) begin
-        grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg <= 1'b0;
+        grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg <= 1'b0;
     end else begin
         if ((1'b1 == ap_CS_fsm_state4)) begin
-            grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg <= 1'b1;
-        end else if ((grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_ready == 1'b1)) begin
-            grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg <= 1'b0;
+            grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg <= 1'b1;
+        end else if ((grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_ready == 1'b1)) begin
+            grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg <= 1'b0;
         end
     end
 end
 
 always @ (posedge ap_clk) begin
-    if ((1'b1 == ap_CS_fsm_state2)) begin
-        icmp_ln1057_reg_124 <= icmp_ln1057_fu_87_p2;
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if ((1'b1 == ap_CS_fsm_state1)) begin
-        p_capturesize_V_reg_117 <= capturesize_dout;
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (((1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
-        trunc_ln_reg_128 <= {{p_read[63:5]}};
+    if (((1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
+        trunc_ln_reg_174 <= {{p_read[63:5]}};
     end
 end
 
 always @ (*) begin
-    if (((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_reg_124 == 1'd0))) begin
+    if (((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
         ap_ST_fsm_state10_blk = 1'b1;
     end else begin
         ap_ST_fsm_state10_blk = 1'b0;
@@ -362,7 +347,7 @@ end
 assign ap_ST_fsm_state11_blk = 1'b0;
 
 always @ (*) begin
-    if (((capturesize_empty_n == 1'b0) | (ap_done_reg == 1'b1) | (ap_start == 1'b0))) begin
+    if (((ap_done_reg == 1'b1) | (ap_start == 1'b0))) begin
         ap_ST_fsm_state1_blk = 1'b1;
     end else begin
         ap_ST_fsm_state1_blk = 1'b0;
@@ -382,7 +367,7 @@ end
 assign ap_ST_fsm_state4_blk = 1'b0;
 
 always @ (*) begin
-    if ((grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_done == 1'b0)) begin
+    if ((grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_done == 1'b0)) begin
         ap_ST_fsm_state5_blk = 1'b1;
     end else begin
         ap_ST_fsm_state5_blk = 1'b0;
@@ -422,23 +407,7 @@ always @ (*) begin
 end
 
 always @ (*) begin
-    if ((~((ap_done_reg == 1'b1) | (ap_start == 1'b0)) & (1'b1 == ap_CS_fsm_state1))) begin
-        capturesize_blk_n = capturesize_empty_n;
-    end else begin
-        capturesize_blk_n = 1'b1;
-    end
-end
-
-always @ (*) begin
-    if ((~((capturesize_empty_n == 1'b0) | (ap_done_reg == 1'b1) | (ap_start == 1'b0)) & (1'b1 == ap_CS_fsm_state1))) begin
-        capturesize_read = 1'b1;
-    end else begin
-        capturesize_read = 1'b0;
-    end
-end
-
-always @ (*) begin
-    if (((1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
+    if (((1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
         gmem_blk_n_AW = m_axi_gmem_AWREADY;
     end else begin
         gmem_blk_n_AW = 1'b1;
@@ -446,7 +415,7 @@ always @ (*) begin
 end
 
 always @ (*) begin
-    if (((1'b1 == ap_CS_fsm_state10) & (icmp_ln1057_reg_124 == 1'd0))) begin
+    if (((1'b1 == ap_CS_fsm_state10) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
         gmem_blk_n_B = m_axi_gmem_BVALID;
     end else begin
         gmem_blk_n_B = 1'b1;
@@ -455,17 +424,17 @@ end
 
 always @ (*) begin
     if ((1'b1 == ap_CS_fsm_state5)) begin
-        iq_in8_read = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_iq_in8_read;
+        iq_in8_read = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_iq_in8_read;
     end else begin
         iq_in8_read = 1'b0;
     end
 end
 
 always @ (*) begin
-    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
-        m_axi_gmem_AWADDR = sext_ln57_fu_102_p1;
+    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
+        m_axi_gmem_AWADDR = sext_ln57_fu_144_p1;
     end else if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWADDR = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWADDR;
+        m_axi_gmem_AWADDR = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWADDR;
     end else begin
         m_axi_gmem_AWADDR = 'bx;
     end
@@ -473,7 +442,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWBURST = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWBURST;
+        m_axi_gmem_AWBURST = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWBURST;
     end else begin
         m_axi_gmem_AWBURST = 2'd0;
     end
@@ -481,7 +450,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWCACHE = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWCACHE;
+        m_axi_gmem_AWCACHE = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWCACHE;
     end else begin
         m_axi_gmem_AWCACHE = 4'd0;
     end
@@ -489,17 +458,17 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWID;
+        m_axi_gmem_AWID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWID;
     end else begin
         m_axi_gmem_AWID = 1'd0;
     end
 end
 
 always @ (*) begin
-    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
-        m_axi_gmem_AWLEN = zext_ln57_fu_113_p1;
+    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
+        m_axi_gmem_AWLEN = zext_ln57_fu_129_p1;
     end else if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWLEN = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLEN;
+        m_axi_gmem_AWLEN = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLEN;
     end else begin
         m_axi_gmem_AWLEN = 'bx;
     end
@@ -507,7 +476,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWLOCK = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWLOCK;
+        m_axi_gmem_AWLOCK = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWLOCK;
     end else begin
         m_axi_gmem_AWLOCK = 2'd0;
     end
@@ -515,7 +484,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWPROT = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWPROT;
+        m_axi_gmem_AWPROT = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWPROT;
     end else begin
         m_axi_gmem_AWPROT = 3'd0;
     end
@@ -523,7 +492,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWQOS = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWQOS;
+        m_axi_gmem_AWQOS = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWQOS;
     end else begin
         m_axi_gmem_AWQOS = 4'd0;
     end
@@ -531,7 +500,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWREGION = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWREGION;
+        m_axi_gmem_AWREGION = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWREGION;
     end else begin
         m_axi_gmem_AWREGION = 4'd0;
     end
@@ -539,7 +508,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWSIZE = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWSIZE;
+        m_axi_gmem_AWSIZE = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWSIZE;
     end else begin
         m_axi_gmem_AWSIZE = 3'd0;
     end
@@ -547,27 +516,27 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWUSER = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWUSER;
+        m_axi_gmem_AWUSER = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWUSER;
     end else begin
         m_axi_gmem_AWUSER = 1'd0;
     end
 end
 
 always @ (*) begin
-    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
+    if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
         m_axi_gmem_AWVALID = 1'b1;
     end else if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_AWVALID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_AWVALID;
+        m_axi_gmem_AWVALID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_AWVALID;
     end else begin
         m_axi_gmem_AWVALID = 1'b0;
     end
 end
 
 always @ (*) begin
-    if ((~((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_reg_124 == 1'd0)) & (1'b1 == ap_CS_fsm_state10) & (icmp_ln1057_reg_124 == 1'd0))) begin
+    if ((~((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_fu_107_p2 == 1'd1)) & (1'b1 == ap_CS_fsm_state10) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
         m_axi_gmem_BREADY = 1'b1;
     end else if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_BREADY = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_BREADY;
+        m_axi_gmem_BREADY = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_BREADY;
     end else begin
         m_axi_gmem_BREADY = 1'b0;
     end
@@ -575,7 +544,7 @@ end
 
 always @ (*) begin
     if (((1'b1 == ap_CS_fsm_state5) | (1'b1 == ap_CS_fsm_state4))) begin
-        m_axi_gmem_WVALID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WVALID;
+        m_axi_gmem_WVALID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WVALID;
     end else begin
         m_axi_gmem_WVALID = 1'b0;
     end
@@ -584,7 +553,7 @@ end
 always @ (*) begin
     case (ap_CS_fsm)
         ap_ST_fsm_state1 : begin
-            if ((~((capturesize_empty_n == 1'b0) | (ap_done_reg == 1'b1) | (ap_start == 1'b0)) & (1'b1 == ap_CS_fsm_state1))) begin
+            if ((~((ap_done_reg == 1'b1) | (ap_start == 1'b0)) & (1'b1 == ap_CS_fsm_state1))) begin
                 ap_NS_fsm = ap_ST_fsm_state2;
             end else begin
                 ap_NS_fsm = ap_ST_fsm_state1;
@@ -594,9 +563,9 @@ always @ (*) begin
             ap_NS_fsm = ap_ST_fsm_state3;
         end
         ap_ST_fsm_state3 : begin
-            if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd1))) begin
+            if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd0))) begin
                 ap_NS_fsm = ap_ST_fsm_state10;
-            end else if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_reg_124 == 1'd0))) begin
+            end else if (((1'b0 == ap_block_state3_io) & (1'b1 == ap_CS_fsm_state3) & (icmp_ln1057_fu_107_p2 == 1'd1))) begin
                 ap_NS_fsm = ap_ST_fsm_state4;
             end else begin
                 ap_NS_fsm = ap_ST_fsm_state3;
@@ -606,7 +575,7 @@ always @ (*) begin
             ap_NS_fsm = ap_ST_fsm_state5;
         end
         ap_ST_fsm_state5 : begin
-            if (((1'b1 == ap_CS_fsm_state5) & (grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_done == 1'b1))) begin
+            if (((1'b1 == ap_CS_fsm_state5) & (grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_done == 1'b1))) begin
                 ap_NS_fsm = ap_ST_fsm_state6;
             end else begin
                 ap_NS_fsm = ap_ST_fsm_state5;
@@ -625,7 +594,7 @@ always @ (*) begin
             ap_NS_fsm = ap_ST_fsm_state10;
         end
         ap_ST_fsm_state10 : begin
-            if ((~((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_reg_124 == 1'd0)) & (1'b1 == ap_CS_fsm_state10))) begin
+            if ((~((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_fu_107_p2 == 1'd1)) & (1'b1 == ap_CS_fsm_state10))) begin
                 ap_NS_fsm = ap_ST_fsm_state11;
             end else begin
                 ap_NS_fsm = ap_ST_fsm_state10;
@@ -639,6 +608,8 @@ always @ (*) begin
         end
     endcase
 end
+
+assign and_ln_fu_121_p3 = {{tmp_2_fu_112_p4}, {1'd0}};
 
 assign ap_CS_fsm_state1 = ap_CS_fsm[32'd0];
 
@@ -655,20 +626,24 @@ assign ap_CS_fsm_state4 = ap_CS_fsm[32'd3];
 assign ap_CS_fsm_state5 = ap_CS_fsm[32'd4];
 
 always @ (*) begin
-    ap_block_state1 = ((capturesize_empty_n == 1'b0) | (ap_done_reg == 1'b1) | (ap_start == 1'b0));
+    ap_block_state1 = ((ap_done_reg == 1'b1) | (ap_start == 1'b0));
 end
 
 always @ (*) begin
-    ap_block_state10 = ((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_reg_124 == 1'd0));
+    ap_block_state10 = ((m_axi_gmem_BVALID == 1'b0) & (icmp_ln1057_fu_107_p2 == 1'd1));
 end
 
 always @ (*) begin
-    ap_block_state3_io = ((m_axi_gmem_AWREADY == 1'b0) & (icmp_ln1057_reg_124 == 1'd0));
+    ap_block_state3_io = ((m_axi_gmem_AWREADY == 1'b0) & (icmp_ln1057_fu_107_p2 == 1'd1));
 end
 
-assign grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_ap_start_reg;
+assign capturesize_cast_fu_93_p1 = capturesize;
 
-assign icmp_ln1057_fu_87_p2 = ((p_capturesize_V_reg_117 == 27'd0) ? 1'b1 : 1'b0);
+assign grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_ap_start_reg;
+
+assign grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_sext_ln1057 = sub_i_i_fu_97_p2[26:0];
+
+assign icmp_ln1057_fu_107_p2 = (($signed(sub_i_i_fu_97_p2) > $signed(28'd0)) ? 1'b1 : 1'b0);
 
 assign m_axi_gmem_ARADDR = 64'd0;
 
@@ -696,20 +671,24 @@ assign m_axi_gmem_ARVALID = 1'b0;
 
 assign m_axi_gmem_RREADY = 1'b0;
 
-assign m_axi_gmem_WDATA = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WDATA;
+assign m_axi_gmem_WDATA = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WDATA;
 
-assign m_axi_gmem_WID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WID;
+assign m_axi_gmem_WID = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WID;
 
-assign m_axi_gmem_WLAST = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WLAST;
+assign m_axi_gmem_WLAST = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WLAST;
 
-assign m_axi_gmem_WSTRB = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WSTRB;
+assign m_axi_gmem_WSTRB = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WSTRB;
 
-assign m_axi_gmem_WUSER = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77_m_axi_gmem_WUSER;
+assign m_axi_gmem_WUSER = grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83_m_axi_gmem_WUSER;
 
-assign sext_ln57_fu_102_p1 = trunc_ln_fu_92_p4;
+assign sext_ln57_fu_144_p1 = trunc_ln_fu_134_p4;
 
-assign trunc_ln_fu_92_p4 = {{p_read[63:5]}};
+assign sub_i_i_fu_97_p2 = ($signed(capturesize_cast_fu_93_p1) + $signed(28'd268435455));
 
-assign zext_ln57_fu_113_p1 = p_capturesize_V_reg_117;
+assign tmp_2_fu_112_p4 = {{capturesize[26:1]}};
+
+assign trunc_ln_fu_134_p4 = {{p_read[63:5]}};
+
+assign zext_ln57_fu_129_p1 = and_ln_fu_121_p3;
 
 endmodule //adc_capture_put_data_csize_ap_uint_256_s

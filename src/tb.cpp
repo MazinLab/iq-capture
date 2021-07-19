@@ -23,7 +23,7 @@ bool drive_iq(uint256_t out[],  capcount_t persamp_capturesize) {
 	bool fail=false;
 
 	//210=31 200=15 205=23  %2=7  <128=15
-	for (int i=0;i<N_GROUPS; i++) keep[i]=i%2;
+	for (int i=0;i<N_GROUPS; i++) keep[i]=1;//i%2;
 	int nkeep = bitsum(keep);
 
 	capcount_t capturesize = nkeep*persamp_capturesize;
@@ -116,9 +116,9 @@ bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
 			}
 
 			if (out[captured]!=tmp){
-				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<endl;
+				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<" (cycle="<<i<<")"<<endl;
 				fail|=out[captured]!=i;
-			}
+			} else {cout<<"OK "<<out[captured]<<" (cycle="<<i<<")"<<endl;}
 			captured++;
 		} else {
 			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
@@ -140,8 +140,8 @@ int main (void){
 	ap_uint<256> out[OUT_BUF_SIZE];
 	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
 
-	fail|=drive_iq(out, 8);
-	//fail|=drive_adc(1500, out, 1399);
+	//fail|=drive_iq(out, 8);
+	fail|=drive_adc(1500, out, 1398);
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;

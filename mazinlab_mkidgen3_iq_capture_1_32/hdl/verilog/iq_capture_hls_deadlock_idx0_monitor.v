@@ -4,7 +4,7 @@ module iq_capture_hls_deadlock_idx0_monitor ( // for module iq_capture_iq_captur
     input wire clock,
     input wire reset,
     input wire [0:0] axis_block_sigs,
-    input wire [6:0] inst_idle_sigs,
+    input wire [5:0] inst_idle_sigs,
     input wire [3:0] inst_block_sigs,
     output wire [0:0] axis_block_info,
     output wire block

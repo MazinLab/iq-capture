@@ -5,14 +5,14 @@
 
 `timescale 1 ns / 1 ps
 
-module iq_capture_fifo_w27_d3_S_shiftReg (
+module iq_capture_fifo_w256_d3_S_shiftReg (
     clk,
     data,
     ce,
     a,
     q);
 
-parameter DATA_WIDTH = 32'd27;
+parameter DATA_WIDTH = 32'd256;
 parameter ADDR_WIDTH = 32'd2;
 parameter DEPTH = 3'd3;
 
@@ -39,7 +39,7 @@ assign q = SRL_SIG[a];
 
 endmodule
 
-module iq_capture_fifo_w27_d3_S (
+module iq_capture_fifo_w256_d3_S (
     clk,
     reset,
     if_empty_n,
@@ -52,7 +52,7 @@ module iq_capture_fifo_w27_d3_S (
     if_din);
 
 parameter MEM_STYLE   = "shiftreg";
-parameter DATA_WIDTH  = 32'd27;
+parameter DATA_WIDTH  = 32'd256;
 parameter ADDR_WIDTH  = 32'd2;
 parameter DEPTH       = 3'd3;
 
@@ -109,12 +109,12 @@ end
 assign shiftReg_addr = mOutPtr[ADDR_WIDTH] == 1'b0 ? mOutPtr[ADDR_WIDTH-1:0]:{ADDR_WIDTH{1'b0}};
 assign shiftReg_ce = (if_write & if_write_ce) & internal_full_n;
 
-iq_capture_fifo_w27_d3_S_shiftReg 
+iq_capture_fifo_w256_d3_S_shiftReg 
 #(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH),
     .DEPTH(DEPTH))
-U_iq_capture_fifo_w27_d3_S_ram (
+U_iq_capture_fifo_w256_d3_S_ram (
     .clk(clk),
     .data(shiftReg_data),
     .ce(shiftReg_ce),

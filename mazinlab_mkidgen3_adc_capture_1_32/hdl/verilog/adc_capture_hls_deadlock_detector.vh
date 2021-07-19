@@ -135,7 +135,7 @@
         .token_out_vec(token_out_vec_1),
         .dl_detect_out(dl_in_vec[1]));
 
-    assign proc_1_data_FIFO_blk[0] = 1'b0 | (~pair_iq_df_flat_U0.grp_pair_iq_df_flat_Pipeline_read_fu_58.iq_in8_blk_n) | (~pair_iq_df_flat_U0.capturesize_c_blk_n);
+    assign proc_1_data_FIFO_blk[0] = 1'b0 | (~pair_iq_df_flat_U0.iq_in8_blk_n);
     assign proc_1_data_PIPO_blk[0] = 1'b0;
     assign proc_1_start_FIFO_blk[0] = 1'b0;
     assign proc_1_TLF_FIFO_blk[0] = 1'b0;
@@ -186,7 +186,7 @@
         .token_out_vec(token_out_vec_2),
         .dl_detect_out(dl_in_vec[2]));
 
-    assign proc_2_data_FIFO_blk[0] = 1'b0 | (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77.iq_in8_blk_n) | (~put_data_csize_ap_uint_256_U0.capturesize_blk_n);
+    assign proc_2_data_FIFO_blk[0] = 1'b0 | (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83.iq_in8_blk_n);
     assign proc_2_data_PIPO_blk[0] = 1'b0;
     assign proc_2_start_FIFO_blk[0] = 1'b0;
     assign proc_2_TLF_FIFO_blk[0] = 1'b0;

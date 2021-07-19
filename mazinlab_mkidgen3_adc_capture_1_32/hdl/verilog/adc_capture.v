@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps 
 
-(* CORE_GENERATION_INFO="adc_capture_adc_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.452688,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2163,HLS_SYN_LUT=2153,HLS_VERSION=2021_1}" *)
+(* CORE_GENERATION_INFO="adc_capture_adc_capture,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=2175,HLS_SYN_LUT=2119,HLS_VERSION=2021_1}" *)
 
 module adc_capture (
 // synthesis translate_off
@@ -223,15 +223,12 @@ wire    pair_iq_df_flat_U0_istream_V_TREADY;
 wire    pair_iq_df_flat_U0_qstream_V_TREADY;
 wire   [255:0] pair_iq_df_flat_U0_iq_in8_din;
 wire    pair_iq_df_flat_U0_iq_in8_write;
-wire   [26:0] pair_iq_df_flat_U0_capturesize_c_din;
-wire    pair_iq_df_flat_U0_capturesize_c_write;
 wire    put_data_csize_ap_uint_256_U0_ap_start;
 wire    put_data_csize_ap_uint_256_U0_ap_done;
 wire    put_data_csize_ap_uint_256_U0_ap_continue;
 wire    put_data_csize_ap_uint_256_U0_ap_idle;
 wire    put_data_csize_ap_uint_256_U0_ap_ready;
 wire    put_data_csize_ap_uint_256_U0_iq_in8_read;
-wire    put_data_csize_ap_uint_256_U0_capturesize_read;
 wire    put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID;
 wire   [63:0] put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR;
 wire   [0:0] put_data_csize_ap_uint_256_U0_m_axi_gmem_AWID;
@@ -269,9 +266,6 @@ wire    iqout_c_channel_empty_n;
 wire    iq_in_full_n;
 wire   [255:0] iq_in_dout;
 wire    iq_in_empty_n;
-wire    capturesize_c_full_n;
-wire   [26:0] capturesize_c_dout;
-wire    capturesize_c_empty_n;
 wire    ap_sync_ready;
 reg    ap_sync_reg_entry_proc_U0_ap_ready;
 wire    ap_sync_entry_proc_U0_ap_ready;
@@ -465,10 +459,7 @@ adc_capture_pair_iq_df_flat pair_iq_df_flat_U0(
     .capturesize(capturesize),
     .iq_in8_din(pair_iq_df_flat_U0_iq_in8_din),
     .iq_in8_full_n(iq_in_full_n),
-    .iq_in8_write(pair_iq_df_flat_U0_iq_in8_write),
-    .capturesize_c_din(pair_iq_df_flat_U0_capturesize_c_din),
-    .capturesize_c_full_n(capturesize_c_full_n),
-    .capturesize_c_write(pair_iq_df_flat_U0_capturesize_c_write)
+    .iq_in8_write(pair_iq_df_flat_U0_iq_in8_write)
 );
 
 adc_capture_put_data_csize_ap_uint_256_s put_data_csize_ap_uint_256_U0(
@@ -482,9 +473,7 @@ adc_capture_put_data_csize_ap_uint_256_s put_data_csize_ap_uint_256_U0(
     .iq_in8_dout(iq_in_dout),
     .iq_in8_empty_n(iq_in_empty_n),
     .iq_in8_read(put_data_csize_ap_uint_256_U0_iq_in8_read),
-    .capturesize_dout(capturesize_c_dout),
-    .capturesize_empty_n(capturesize_c_empty_n),
-    .capturesize_read(put_data_csize_ap_uint_256_U0_capturesize_read),
+    .capturesize(capturesize),
     .m_axi_gmem_AWVALID(put_data_csize_ap_uint_256_U0_m_axi_gmem_AWVALID),
     .m_axi_gmem_AWREADY(gmem_AWREADY),
     .m_axi_gmem_AWADDR(put_data_csize_ap_uint_256_U0_m_axi_gmem_AWADDR),
@@ -546,7 +535,7 @@ adc_capture_fifo_w64_d2_S iqout_c_channel_U(
     .if_read(put_data_csize_ap_uint_256_U0_ap_ready)
 );
 
-adc_capture_fifo_w256_d4_S iq_in_U(
+adc_capture_fifo_w256_d8_S iq_in_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
@@ -557,19 +546,6 @@ adc_capture_fifo_w256_d4_S iq_in_U(
     .if_dout(iq_in_dout),
     .if_empty_n(iq_in_empty_n),
     .if_read(put_data_csize_ap_uint_256_U0_iq_in8_read)
-);
-
-adc_capture_fifo_w27_d2_S capturesize_c_U(
-    .clk(ap_clk),
-    .reset(ap_rst_n_inv),
-    .if_read_ce(1'b1),
-    .if_write_ce(1'b1),
-    .if_din(pair_iq_df_flat_U0_capturesize_c_din),
-    .if_full_n(capturesize_c_full_n),
-    .if_write(pair_iq_df_flat_U0_capturesize_c_write),
-    .if_dout(capturesize_c_dout),
-    .if_empty_n(capturesize_c_empty_n),
-    .if_read(put_data_csize_ap_uint_256_U0_capturesize_read)
 );
 
 always @ (posedge ap_clk) begin

@@ -240,7 +240,7 @@
                 1 : begin
                     case(index2)
                     2: begin
-                        if (~pair_iq_df_flat_U0.grp_pair_iq_df_flat_Pipeline_read_fu_58.iq_in8_blk_n) begin
+                        if (~pair_iq_df_flat_U0.iq_in8_blk_n) begin
                             if (~iq_in_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'adc_capture_adc_capture.iq_in_U' written by process 'adc_capture_adc_capture.put_data_csize_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.iq_in_U");
@@ -249,18 +249,6 @@
                             else if (~iq_in_U.if_full_n) begin
                                 $display("//      Blocked by full output FIFO 'adc_capture_adc_capture.iq_in_U' read by process 'adc_capture_adc_capture.put_data_csize_ap_uint_256_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.iq_in_U");
-                                $fdisplay(fp, "Dependence_Channel_status FULL");
-                            end
-                        end
-                        if (~pair_iq_df_flat_U0.capturesize_c_blk_n) begin
-                            if (~capturesize_c_U.if_empty_n) begin
-                                $display("//      Blocked by empty input FIFO 'adc_capture_adc_capture.capturesize_c_U' written by process 'adc_capture_adc_capture.put_data_csize_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.capturesize_c_U");
-                                $fdisplay(fp, "Dependence_Channel_status EMPTY");
-                            end
-                            else if (~capturesize_c_U.if_full_n) begin
-                                $display("//      Blocked by full output FIFO 'adc_capture_adc_capture.capturesize_c_U' read by process 'adc_capture_adc_capture.put_data_csize_ap_uint_256_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.capturesize_c_U");
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end
@@ -275,7 +263,7 @@
                 2 : begin
                     case(index2)
                     1: begin
-                        if (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_77.iq_in8_blk_n) begin
+                        if (~put_data_csize_ap_uint_256_U0.grp_put_data_csize_ap_uint_256_Pipeline_write_fu_83.iq_in8_blk_n) begin
                             if (~iq_in_U.if_empty_n) begin
                                 $display("//      Blocked by empty input FIFO 'adc_capture_adc_capture.iq_in_U' written by process 'adc_capture_adc_capture.pair_iq_df_flat_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.iq_in_U");
@@ -284,18 +272,6 @@
                             else if (~iq_in_U.if_full_n) begin
                                 $display("//      Blocked by full output FIFO 'adc_capture_adc_capture.iq_in_U' read by process 'adc_capture_adc_capture.pair_iq_df_flat_U0'");
                                 $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.iq_in_U");
-                                $fdisplay(fp, "Dependence_Channel_status FULL");
-                            end
-                        end
-                        if (~put_data_csize_ap_uint_256_U0.capturesize_blk_n) begin
-                            if (~capturesize_c_U.if_empty_n) begin
-                                $display("//      Blocked by empty input FIFO 'adc_capture_adc_capture.capturesize_c_U' written by process 'adc_capture_adc_capture.pair_iq_df_flat_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.capturesize_c_U");
-                                $fdisplay(fp, "Dependence_Channel_status EMPTY");
-                            end
-                            else if (~capturesize_c_U.if_full_n) begin
-                                $display("//      Blocked by full output FIFO 'adc_capture_adc_capture.capturesize_c_U' read by process 'adc_capture_adc_capture.pair_iq_df_flat_U0'");
-                                $fdisplay(fp, "Dependence_Channel_path adc_capture_adc_capture.capturesize_c_U");
                                 $fdisplay(fp, "Dependence_Channel_status FULL");
                             end
                         end

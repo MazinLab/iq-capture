@@ -4,7 +4,7 @@ module adc_capture_hls_deadlock_idx0_monitor ( // for module adc_capture_adc_cap
     input wire clock,
     input wire reset,
     input wire [1:0] axis_block_sigs,
-    input wire [5:0] inst_idle_sigs,
+    input wire [4:0] inst_idle_sigs,
     input wire [2:0] inst_block_sigs,
     output wire [3:0] axis_block_info,
     output wire block

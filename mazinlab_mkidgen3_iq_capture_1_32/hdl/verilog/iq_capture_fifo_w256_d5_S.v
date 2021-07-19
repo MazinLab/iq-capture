@@ -5,16 +5,16 @@
 
 `timescale 1 ns / 1 ps
 
-module iq_capture_fifo_w35_d2_S_shiftReg (
+module iq_capture_fifo_w256_d5_S_shiftReg (
     clk,
     data,
     ce,
     a,
     q);
 
-parameter DATA_WIDTH = 32'd35;
-parameter ADDR_WIDTH = 32'd1;
-parameter DEPTH = 2'd2;
+parameter DATA_WIDTH = 32'd256;
+parameter ADDR_WIDTH = 32'd3;
+parameter DEPTH = 4'd5;
 
 input clk;
 input [DATA_WIDTH-1:0] data;
@@ -39,7 +39,7 @@ assign q = SRL_SIG[a];
 
 endmodule
 
-module iq_capture_fifo_w35_d2_S (
+module iq_capture_fifo_w256_d5_S (
     clk,
     reset,
     if_empty_n,
@@ -52,9 +52,9 @@ module iq_capture_fifo_w35_d2_S (
     if_din);
 
 parameter MEM_STYLE   = "shiftreg";
-parameter DATA_WIDTH  = 32'd35;
-parameter ADDR_WIDTH  = 32'd1;
-parameter DEPTH       = 2'd2;
+parameter DATA_WIDTH  = 32'd256;
+parameter ADDR_WIDTH  = 32'd3;
+parameter DEPTH       = 4'd5;
 
 input clk;
 input reset;
@@ -90,17 +90,17 @@ always @ (posedge clk) begin
         if (((if_read & if_read_ce) == 1 & internal_empty_n == 1) && 
             ((if_write & if_write_ce) == 0 | internal_full_n == 0))
         begin
-            mOutPtr <= mOutPtr - 2'd1;
-            if (mOutPtr == 2'd0)
+            mOutPtr <= mOutPtr - 4'd1;
+            if (mOutPtr == 4'd0)
                 internal_empty_n <= 1'b0;
             internal_full_n <= 1'b1;
         end 
         else if (((if_read & if_read_ce) == 0 | internal_empty_n == 0) && 
             ((if_write & if_write_ce) == 1 & internal_full_n == 1))
         begin
-            mOutPtr <= mOutPtr + 2'd1;
+            mOutPtr <= mOutPtr + 4'd1;
             internal_empty_n <= 1'b1;
-            if (mOutPtr == DEPTH - 2'd2)
+            if (mOutPtr == DEPTH - 4'd2)
                 internal_full_n <= 1'b0;
         end 
     end
@@ -109,12 +109,12 @@ end
 assign shiftReg_addr = mOutPtr[ADDR_WIDTH] == 1'b0 ? mOutPtr[ADDR_WIDTH-1:0]:{ADDR_WIDTH{1'b0}};
 assign shiftReg_ce = (if_write & if_write_ce) & internal_full_n;
 
-iq_capture_fifo_w35_d2_S_shiftReg 
+iq_capture_fifo_w256_d5_S_shiftReg 
 #(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH),
     .DEPTH(DEPTH))
-U_iq_capture_fifo_w35_d2_S_ram (
+U_iq_capture_fifo_w256_d5_S_ram (
     .clk(clk),
     .data(shiftReg_data),
     .ce(shiftReg_ce),

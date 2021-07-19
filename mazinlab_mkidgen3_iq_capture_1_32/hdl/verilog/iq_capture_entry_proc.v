@@ -15,10 +15,8 @@ module iq_capture_entry_proc (
         ap_continue,
         ap_idle,
         ap_ready,
-        capturesize,
         iqout,
-        ap_return_0,
-        ap_return_1
+        ap_return
 );
 
 parameter    ap_ST_fsm_state1 = 3'd1;
@@ -32,23 +30,17 @@ output   ap_done;
 input   ap_continue;
 output   ap_idle;
 output   ap_ready;
-input  [26:0] capturesize;
 input  [63:0] iqout;
-output  [26:0] ap_return_0;
-output  [63:0] ap_return_1;
+output  [63:0] ap_return;
 
 reg ap_done;
 reg ap_idle;
 reg ap_ready;
-reg[26:0] ap_return_0;
-reg[63:0] ap_return_1;
+reg[63:0] ap_return;
 
 reg    ap_done_reg;
 (* fsm_encoding = "none" *) reg   [2:0] ap_CS_fsm;
 wire    ap_CS_fsm_state1;
-reg   [26:0] capturesize_0_data_reg;
-reg    capturesize_0_vld_reg;
-reg    capturesize_0_ack_out;
 reg   [63:0] iqout_0_data_reg;
 reg    iqout_0_vld_reg;
 reg    iqout_0_ack_out;
@@ -65,8 +57,6 @@ wire    ap_ce_reg;
 initial begin
 #0 ap_done_reg = 1'b0;
 #0 ap_CS_fsm = 3'd1;
-#0 capturesize_0_data_reg = 27'd0;
-#0 capturesize_0_vld_reg = 1'b0;
 #0 iqout_0_data_reg = 64'd0;
 #0 iqout_0_vld_reg = 1'b0;
 end
@@ -93,14 +83,7 @@ end
 
 always @ (posedge ap_clk) begin
     if ((1'b1 == ap_CS_fsm_state2)) begin
-        ap_return_0 <= capturesize_0_data_reg;
-        ap_return_1 <= iqout_0_data_reg;
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (((~((ap_start == 1'b0) & (1'b1 == ap_CS_fsm_state1)) & (capturesize_0_ack_out == 1'b1) & (1'b1 == 1'b1) & (capturesize_0_vld_reg == 1'b1)) | (~((ap_start == 1'b0) & (1'b1 == ap_CS_fsm_state1)) & (1'b1 == 1'b1) & (capturesize_0_vld_reg == 1'b0)))) begin
-        capturesize_0_data_reg <= capturesize;
+        ap_return <= iqout_0_data_reg;
     end
 end
 
@@ -147,15 +130,7 @@ always @ (*) begin
 end
 
 always @ (*) begin
-    if (((1'b1 == ap_CS_fsm_state2) | (1'b1 == ap_CS_fsm_state3))) begin
-        capturesize_0_ack_out = 1'b1;
-    end else begin
-        capturesize_0_ack_out = 1'b0;
-    end
-end
-
-always @ (*) begin
-    if (((1'b1 == ap_CS_fsm_state2) | (1'b1 == ap_CS_fsm_state3))) begin
+    if (((1'b1 == ap_CS_fsm_state3) | (1'b1 == ap_CS_fsm_state2))) begin
         iqout_0_ack_out = 1'b1;
     end else begin
         iqout_0_ack_out = 1'b0;
