@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <spirit:component xmlns:xilinx="http://www.xilinx.com" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1685-2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <spirit:vendor>mazinlab</spirit:vendor>
-  <spirit:library>mkjidgen3</spirit:library>
+  <spirit:library>mkidgen3</spirit:library>
   <spirit:name>iq_capture</spirit:name>
   <spirit:version>1.34</spirit:version>
   <spirit:busInterfaces>
@@ -3360,8 +3360,8 @@
       </xilinx:taxonomies>
       <xilinx:displayName>IQ Capture</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2107280649</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2021-07-28T13:49:37Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2107280654</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2021-07-28T13:54:14Z</xilinx:coreCreationDateTime>
       <xilinx:sdxKernelAttributes>
         <xilinx:sdx_kernel>true</xilinx:sdx_kernel>
         <xilinx:sdx_kernel_type>hls</xilinx:sdx_kernel_type>
