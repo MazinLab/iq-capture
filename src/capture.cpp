@@ -24,6 +24,8 @@ const unsigned char burst_lev=BURST_LEN;
 template <class Taxis, class T>
 void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize, const keep_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched_keep) {
 
+#pragma HLS STABLE variable=capturesize
+#pragma HLS STABLE variable=keep
 	totalcapcount_t _capturesize=capturesize;
 	keep_t _keep=keep;
 
@@ -38,8 +40,28 @@ void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize
 	}
 }
 
+template <class Taxis, class T>
+void phase_fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize, const phasekeep_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched_keep) {
+
+#pragma HLS STABLE variable=capturesize
+#pragma HLS STABLE variable=keep
+	totalcapcount_t _capturesize=capturesize;
+	phasekeep_t _keep=keep;
+
+	read: for(int i=0;i<_capturesize-1;i+=2) {
+#pragma HLS PIPELINE II=2
+		Taxis resin=resstream.read();
+		fetched.write(resin.data);
+		fetched_keep.write(_keep[resin.user.range(8,0)]);
+		resin=resstream.read();
+		fetched.write(resin.data);
+		fetched_keep.write(_keep[resin.user.range(8,0)]);
+	}
+}
+
 template <class T>
 void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, const totalcapcount_t capturesize, hls::stream<T> &forwarded){
+#pragma HLS STABLE variable=capturesize
 	totalcapcount_t _capturesize=capturesize;
 	forward: for(int i=0;i<_capturesize-1;i+=2) {
 #pragma HLS PIPELINE II=2
@@ -54,6 +76,8 @@ void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, cons
 
 template <class T>
 void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqout){
+#pragma HLS STABLE variable=capturesize
+#pragma HLS STABLE variable=iqout
 	T* out_addr=(T*) iqout;
 	capcount_t _capturesize=capturesize;
 	write: for(int i=0;i<_capturesize-1;i+=2) {
@@ -156,14 +180,42 @@ void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_
 	hls::stream<uint256_t> fetched("fetch"), toout("toout");
 	hls::stream<bool> fetched_keep("fetch2");
 #pragma HLS stream depth=3 variable=fetched_keep
-#pragma HLS stream depth=3 variable=fetched
-#pragma HLS stream depth=5 variable=toout
+#pragma HLS stream depth=3 variable=fetched //type=pipo
+#pragma HLS STREAM depth=5 variable=toout
 
 	fetch_data<resstream_t, uint256_t>(resstream, total_capturesize, keep, fetched, fetched_keep);
 	capture_data<uint256_t>(fetched, fetched_keep, total_capturesize, toout);
 	put_data_csize<uint256_t>(toout, capturesize, iqout);
 }
 
+
+//Here we are on a 512 packet length instead of a 256 packet length
+//
+void phase_capture(hls::stream<phasestream_t> &phasestream, phasekeep_t keep, totalcapcount_t total_capturesize,
+				    capcount_t capturesize, phaseout_t *out) {
+#pragma HLS DATAFLOW
+#pragma HLS INTERFACE axis register port=phasestream depth=2048
+#pragma HLS INTERFACE m_axi port=out offset=slave depth=2048 max_read_burst_length=1 max_write_burst_length=256 num_read_outstanding=1 num_write_outstanding=1
+#pragma HLS INTERFACE s_axilite port=out bundle=control
+#pragma HLS INTERFACE s_axilite port=keep bundle=control
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=total_capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
+#pragma HLS STABLE variable=total_capturesize
+#pragma HLS STABLE variable=capturesize
+#pragma HLS STABLE variable=out
+#pragma HLS STABLE variable=keep
+	hls::stream<phaseout_t> fetched("fetch"), toout("toout");
+	hls::stream<bool> fetched_keep("fetch2");
+#pragma HLS stream depth=3 variable=fetched_keep
+#pragma HLS stream depth=3 variable=fetched
+#pragma HLS STREAM depth=5 variable=toout
+
+	phase_fetch_data<phasestream_t, phaseout_t>(phasestream, total_capturesize, keep, fetched, fetched_keep);
+	capture_data<phaseout_t>(fetched, fetched_keep, total_capturesize, toout);
+	put_data_csize<phaseout_t>(toout, capturesize, out);
+}
 
 //void phase_capture(phasestream_t &stream, uint256_t keep, capcount_t capturesize, phaseout_t *out) {
 //#pragma HLS DATAFLOW
