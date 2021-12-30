@@ -26,10 +26,11 @@ void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize
 
 #pragma HLS STABLE variable=capturesize
 #pragma HLS STABLE variable=keep
-	totalcapcount_t _capturesize=capturesize;
+
+	unsigned long long _capturesize=capturesize>>1;
 	keep_t _keep=keep;
 
-	read: for(int i=0;i<_capturesize-1;i+=2) {
+	read: for(unsigned long long i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=2
 		Taxis resin=resstream.read();
 		fetched.write(resin.data);
@@ -62,13 +63,16 @@ void phase_fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t captu
 template <class T>
 void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, const totalcapcount_t capturesize, hls::stream<T> &forwarded){
 #pragma HLS STABLE variable=capturesize
-	totalcapcount_t _capturesize=capturesize;
-	forward: for(int i=0;i<_capturesize-1;i+=2) {
+
+	unsigned long long _capturesize=capturesize>>1;
+	forward: for(unsigned long long i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=2
 		T out=fetched.read();
-		if (fetched_keep.read()) forwarded.write(out);
+		if (fetched_keep.read())
+			forwarded.write(out);
 		out=fetched.read();
-		if (fetched_keep.read()) forwarded.write(out);
+		if (fetched_keep.read())
+			forwarded.write(out);
 	}
 }
 
@@ -79,11 +83,11 @@ void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqou
 #pragma HLS STABLE variable=capturesize
 #pragma HLS STABLE variable=iqout
 	T* out_addr=(T*) iqout;
-	capcount_t _capturesize=capturesize;
-	write: for(int i=0;i<_capturesize-1;i+=2) {
+	int _capturesize=capturesize>>1;
+	write: for(int i=0;i<_capturesize;i++) {
 #pragma HLS PIPELINE II=2
-		out_addr[i]=toout.read();
-		out_addr[i+1]=toout.read();
+		out_addr[2*i]=toout.read();
+		out_addr[2*i+1]=toout.read();
 	}
 }
 
