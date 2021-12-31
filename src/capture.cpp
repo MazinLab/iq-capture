@@ -14,6 +14,7 @@
 using namespace std;
 #endif
 #include <string.h>
+#include <assert.h>
 #include "ap_int.h"
 
 #define SAMPLES 513
@@ -22,15 +23,15 @@ using namespace std;
 const unsigned char burst_lev=BURST_LEN;
 
 template <class Taxis, class T>
-void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t capturesize, const keep_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched_keep) {
-
-#pragma HLS STABLE variable=capturesize
+void fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t size, const keep_t keep, hls::stream<T> &fetched, hls::stream<bool> &fetched_keep) {
+#pragma HLS STABLE variable=size
 #pragma HLS STABLE variable=keep
 
-	unsigned long long _capturesize=capturesize>>1;
+	unsigned long long _size=size>>1;
 	keep_t _keep=keep;
-
-	read: for(unsigned long long i=0;i<_capturesize;i++) {
+	assert (_size>0);
+	read: for(unsigned long long i=0;i<_size;i++) {
+#pragma HLS LOOP_TRIPCOUNT min=1 max=2^34
 #pragma HLS PIPELINE II=2
 		Taxis resin=resstream.read();
 		fetched.write(resin.data);
@@ -61,11 +62,14 @@ void phase_fetch_data(hls::stream<Taxis> &resstream, const totalcapcount_t captu
 }
 
 template <class T>
-void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, const totalcapcount_t capturesize, hls::stream<T> &forwarded){
-#pragma HLS STABLE variable=capturesize
+void capture_data(hls::stream<T> &fetched, hls::stream<bool> &fetched_keep, const totalcapcount_t size, hls::stream<T> &forwarded){
+#pragma HLS STABLE variable=size
 
-	unsigned long long _capturesize=capturesize>>1;
-	forward: for(unsigned long long i=0;i<_capturesize;i++) {
+
+	unsigned long long _size=size>>1;
+	assert (_size>0);
+	forward: for(unsigned long long i=0;i<_size;i++) {
+#pragma HLS LOOP_TRIPCOUNT min=1 max=2^34
 #pragma HLS PIPELINE II=2
 		T out=fetched.read();
 		if (fetched_keep.read())
@@ -84,7 +88,9 @@ void put_data_csize(hls::stream<T> &toout, const capcount_t capturesize, T *iqou
 #pragma HLS STABLE variable=iqout
 	T* out_addr=(T*) iqout;
 	int _capturesize=capturesize>>1;
+	assert (_capturesize>0);
 	write: for(int i=0;i<_capturesize;i++) {
+#pragma HLS LOOP_TRIPCOUNT min=1 max=2^26
 #pragma HLS PIPELINE II=2
 		out_addr[2*i]=toout.read();
 		out_addr[2*i+1]=toout.read();
@@ -184,7 +190,7 @@ void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_
 	hls::stream<uint256_t> fetched("fetch"), toout("toout");
 	hls::stream<bool> fetched_keep("fetch2");
 #pragma HLS stream depth=3 variable=fetched_keep
-#pragma HLS stream depth=3 variable=fetched //type=pipo
+#pragma HLS stream depth=3 variable=fetched
 #pragma HLS STREAM depth=5 variable=toout
 
 	fetch_data<resstream_t, uint256_t>(resstream, total_capturesize, keep, fetched, fetched_keep);

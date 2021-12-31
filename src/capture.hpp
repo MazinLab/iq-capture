@@ -17,6 +17,11 @@
 #define N_GROUPS 256
 #define N_PHASEGROUPS 512
 
+
+#define MAX_IQGRPCAPCOUNT 2^27 //2^32 bytes / 32 bytes
+#define MAX_GROUPS_PROCESS MAX_IQGRPCAPCOUNT
+#define IQ_BURST_SIZE 128
+
 typedef ap_uint<8> group_t;
 typedef ap_uint<9> phasegroup_t;
 typedef ap_uint<N_GROUPS> keep_t;
