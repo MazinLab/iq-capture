@@ -43,3 +43,4 @@ typedef ap_axiu<N_PHASE*16,16,0,0> phasestream_t;
 void phase_capture(hls::stream<phasestream_t> &phasestream, phasekeep_t keep, totalcapcount_t total_capturesize, capcount_t capturesize, phaseout_t *out);
 void iq_capture(hls::stream<resstream_t> &resstream, keep_t keep, totalcapcount_t total_capturesize, capcount_t capturesize, uint256_t *out);
 void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream, capcount_t capturesize, uint256_t *out);
+void simple_capture(hls::stream<resstream_t> &stream, capcount_t capturesize, uint256_t *out);

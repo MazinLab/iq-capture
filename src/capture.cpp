@@ -147,6 +147,23 @@ void pair_iq_df_flat(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in,
 }
 
 
+void readinput(hls::stream<resstream_t> &in, const capcount_t capturesize, hls::stream<uint256_t> &out) {
+
+	int _capturesize = capturesize>1;
+
+	readloop: for(int i=0;i<_capturesize;i++) {
+#pragma HLS PIPELINE II=2
+		uint256_t dataout;
+		resstream_t val;
+		val=in.read();
+		dataout=val.data;
+		out.write(dataout);
+		val=in.read();
+		dataout=val.data;
+		out.write(dataout);
+	}
+}
+
 void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstream,
 		capcount_t capturesize, uint256_t *iqout) {
 #pragma HLS DATAFLOW
@@ -167,6 +184,23 @@ void adc_capture(hls::stream<uint128_t> &istream, hls::stream<uint128_t> &qstrea
 
 }
 
+void simple_capture(hls::stream<resstream_t> &stream, capcount_t capturesize, uint256_t *iqout) {
+#pragma HLS DATAFLOW
+#pragma HLS INTERFACE axis register port=stream depth=2048
+#pragma HLS INTERFACE m_axi port=iqout offset=slave depth=2048 max_read_burst_length=2 max_write_burst_length=128 num_read_outstanding=1 num_write_outstanding=2
+#pragma HLS INTERFACE s_axilite port=iqout bundle=control
+#pragma HLS INTERFACE s_axilite port=capturesize bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS STABLE variable=capturesize
+#pragma HLS STABLE variable=iqout
+
+	hls::stream<uint256_t> iq_in("fetch");
+#pragma HLS STREAM variable=iq_in depth=8
+
+	readinput(stream, capturesize, iq_in);
+	put_data_csize<uint256_t>(iq_in, capturesize, iqout);
+
+}
 
 //total_capturesize must be the number of samples to ingest to capture capturesize samples
 //	given keep. bitsum(keep) uint256_t are captured per group of 256 inbound samples
