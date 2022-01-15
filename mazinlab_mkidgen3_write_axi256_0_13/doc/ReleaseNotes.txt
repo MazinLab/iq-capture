@@ -4,7 +4,7 @@
 # ==============================================================
 
 Family       : zynquplus
-Device       : xczu21dr
-Package      : -ffvd1156
-Speed Grade  : -1-e
+Device       : xczu28dr
+Package      : -ffvg1517
+Speed Grade  : -2-e
 Clock Period : 1.818 ns

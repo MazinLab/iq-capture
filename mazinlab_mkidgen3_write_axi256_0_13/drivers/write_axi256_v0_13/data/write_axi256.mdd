@@ -2,9 +2,15 @@
 # Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2021.1 (64-bit)
 # Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
 # ==============================================================
+OPTION psf_version = 2.1;
 
-Family       : zynquplus
-Device       : xczu21dr
-Package      : -ffvd1156
-Speed Grade  : -1-e
-Clock Period : 1.818 ns
+BEGIN driver write_axi256
+
+ OPTION supported_peripherals = (write_axi256_v0_13 );
+ OPTION driver_state = ACTIVE;
+ OPTION copyfiles = all;
+ OPTION name = write_axi256;
+ OPTION version = 0.13;
+
+END driver
+
