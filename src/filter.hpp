@@ -32,3 +32,4 @@ void filter_iq(hls::stream<resstream_t> &instream, hls::stream<iqout_t> &filtere
 void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<phaseout_t> &filtered, phasekeep_t keep, phasegroup_t lastgrp);
 void write_axi256(hls::stream<iqout_t> &filtered, capcount_t capturesize, uint256_t *out);
 void write_axi64(hls::stream<phaseout_t> &filtered, capcount_t capturesize, uint64_t *out);
+void simple_capture(hls::stream<resstream_t> &stream, capcount_t capturesize, uint256_t *out);

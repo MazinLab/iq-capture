@@ -85,12 +85,13 @@ bool drive_iq(uint256_t out[]) {
 
 
 	write_axi256(filteredstreamin, capturesize, out);
+	simple_capture(filteredstreamin, capturesize, out);
 
 	cout<<"Capture "<<capturesize<<" samples."<<endl;
 	for (int j=0;j<capturesize+2;j++) {
 		cout<<"out["<<j<<"]="<<out[j]<<endl;
 	}
-	bool aligned=false;
+	bool aligned=true;
 	int captured=0;
 	for (int j=0;j<total_size;j++) {
 		resstream_t d = iq_for_sample(j+offset);
