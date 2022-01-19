@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps 
 
-(* CORE_GENERATION_INFO="write_axi256_write_axi256,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=33554449,HLS_SYN_TPT=33554449,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=1681,HLS_SYN_LUT=1858,HLS_VERSION=2021_1}" *)
+(* CORE_GENERATION_INFO="write_axi256_write_axi256,hls_ip_2021_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.327140,HLS_SYN_LAT=33554449,HLS_SYN_TPT=33554449,HLS_SYN_MEM=30,HLS_SYN_DSP=0,HLS_SYN_FF=1681,HLS_SYN_LUT=1857,HLS_VERSION=2021_1}" *)
 
 module write_axi256 (
 // synthesis translate_off
@@ -312,7 +312,7 @@ write_axi256_gmem_m_axi #(
     .USER_AW( 64 ),
     .USER_MAXREQS( 16 ),
     .NUM_READ_OUTSTANDING( 1 ),
-    .NUM_WRITE_OUTSTANDING( 8 ),
+    .NUM_WRITE_OUTSTANDING( 4 ),
     .MAX_READ_BURST_LENGTH( 2 ),
     .MAX_WRITE_BURST_LENGTH( 128 ),
     .C_M_AXI_ID_WIDTH( C_M_AXI_GMEM_ID_WIDTH ),
@@ -527,7 +527,7 @@ write_axi256_fifo_w64_d2_S iqout_c_channel_U(
     .if_read(s2mm_rewind_U0_ap_ready)
 );
 
-write_axi256_fifo_w256_d4_S iq_in_U(
+write_axi256_fifo_w256_d8_S iq_in_U(
     .clk(ap_clk),
     .reset(ap_rst_n_inv),
     .if_read_ce(1'b1),
