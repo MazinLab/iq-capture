@@ -183,7 +183,7 @@ void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &o
 
 	grp=pgroup256_t(in.user>>2);
 	_keep = fetch_keep(keep, grp);
-	tmp.last = lastgrp== grp;
+	tmp.last = lastgrp== grp && (in.user&0x3)==3;
 	tmp.keep=-1;
 	if (_keep) outstream.write(tmp);
 }
