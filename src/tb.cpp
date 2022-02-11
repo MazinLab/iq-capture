@@ -196,7 +196,7 @@ bool drive_filteriq() {
 bool drive_filterphase256() {
 
 
-	void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &filtered, pkeep256_t keep, pgroup256_t lastgrp);
+//	void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &filtered, pkeep256_t keep, pgroup256_t lastgrp);
 
 	hls::stream<phasestream_t> streamin("input");
 	hls::stream<out256_t> filteredstream("filtered");
@@ -217,17 +217,18 @@ bool drive_filterphase256() {
 	}
 	for (int j=0;j<total_size;j++) streamin.write(phase_for_sample(j+offset));
 
+	bool error;
 	// keep must have at least 1 bit set
 	for (int j=0;j<total_size/4;j++)
 		filter_phase(streamin, filteredstream, keep, lastbit(keep));
 
 
 	int output=0;
-	for (int j=0;j<total_size/4;j++) {
+	for (int j=0;j<(total_size+offset%4)/4;j++) {
 		uint256_t d;
 		phasestream_t phase;
 		for (int i=0;i<4; i++) {
-			 phase = phase_for_sample(4*j+offset+i);
+			 phase = phase_for_sample(4*j+offset+i+4-(offset%4));
 			 d.range((i+1)*64-1,i*64)=phase.data;
 		}
 		if (keep[phase.user>>2]) {

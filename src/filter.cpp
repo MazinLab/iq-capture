@@ -134,47 +134,7 @@ void filter_phase64(hls::stream<phasestream_t> &instream, hls::stream<phaseout_t
 }
 
 
-//filter_phase_256_ii1_v2
-void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &outstream, pkeep256_t keep, pgroup256_t lastgrp) {
-#pragma HLS PIPELINE II=1
-#pragma HLS INTERFACE mode=axis port=instream register_mode=off //register
-#pragma HLS INTERFACE mode=axis port=outstream register_mode=off //register
-#pragma HLS INTERFACE mode=ap_ctrl_none port=return
-#pragma HLS INTERFACE mode=s_axilite port=keep
-#pragma HLS INTERFACE mode=s_axilite port=lastgrp
-
-	phasestream_t in;
-	pgroup256_t grp;
-	out256_t tmp;
-	bool _keep;
-	ap_uint<2> subgrpin;
-
-	in = instream.read();
-
-	subgrpin.range() = in.user.range(1,0);
-	grp.range() = in.user.range(8,2);
-
-	if (subgrpin==0)
-		tmp.data.range(63, 0) = in.data.range();
-	else if (subgrpin==1)
-		tmp.data.range(127, 64) = in.data.range();
-	else if (subgrpin==2)
-		tmp.data.range(191, 128) = in.data.range();
-	else
-		tmp.data.range(255, 192) = in.data.range();
-
-	_keep = fetch_keep(keep, grp);
-
-	tmp.last=lastgrp==grp;
-	tmp.keep=-1;
-
-	if (_keep && subgrpin==3)
-		outstream.write(tmp);
-
-}
-
-
-void filter_phase_256(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &outstream, pkeep256_t keep, pgroup256_t lastgrp) {
+void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &outstream, pkeep256_t keep, pgroup256_t lastgrp){
 #pragma HLS PIPELINE II=4
 #pragma HLS INTERFACE mode=axis port=instream register_mode=off //register
 #pragma HLS INTERFACE mode=axis port=outstream register_mode=off //register
@@ -185,51 +145,26 @@ void filter_phase_256(hls::stream<phasestream_t> &instream, hls::stream<out256_t
 	phasestream_t in;
 	pgroup256_t grp;
 	out256_t tmp;
-	bool _keep;
+	bool _keep,_aligne;
 
-	for (int i=0; i<4; i++) {
-#pragma HLS UNROLL
+	in = instream.read();
+	_aligne = in.user.range(1,0)!=0;
+	grp=pgroup256_t(in.user>>2);
+	_keep = fetch_keep(keep, grp);
+
+	tmp.data.range(63, 0) = in.data.range();
+	if (!_aligne) {
 		in = instream.read();
-		tmp.data.range((i+1)*(N_PHASE*16)-1, i*(N_PHASE*16)) = in.data.range();
+		tmp.data.range(127, 64) = in.data.range();
+		in = instream.read();
+		tmp.data.range(191, 128) = in.data.range();
+		in = instream.read();
+		tmp.data.range(255, 192) = in.data.range();
 	}
-
-	grp=pgroup256_t(in.user>>2);
-	_keep = fetch_keep(keep, grp);
-	tmp.last = lastgrp== grp;
+	tmp.last=lastgrp== grp;
 	tmp.keep=-1;
-	if (_keep) outstream.write(tmp);
+	if (_keep && !_aligne) outstream.write(tmp);
 }
-
-void filter_phase_autoalign(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &outstream, pkeep256_t keep, pgroup256_t lastgrp) {
-#pragma HLS PIPELINE II=4
-#pragma HLS INTERFACE mode=axis port=instream register_mode=off //register
-#pragma HLS INTERFACE mode=axis port=outstream register_mode=off //register
-#pragma HLS INTERFACE mode=ap_ctrl_none port=return
-#pragma HLS INTERFACE mode=s_axilite port=keep
-#pragma HLS INTERFACE mode=s_axilite port=lastgrp
-
-	phasestream_t in;
-	pgroup256_t grp;
-	out256_t tmp;
-	bool _keep, aligned;
-
-	in = instream.read();
-	aligned=(in.user&0x3)==0;
-	tmp.data.range(N_PHASE*16-1, 0) = in.data.range();
-	for (int i=1; i<3; i++) {
-#pragma HLS UNROLL
-		if (aligned)
-			in = instream.read();
-		tmp.data.range((i+1)*(N_PHASE*16)-1, i*(N_PHASE*16)) = in.data.range();
-	}
-
-	grp=pgroup256_t(in.user>>2);
-	_keep = fetch_keep(keep, grp);
-	tmp.last = lastgrp==grp;
-	tmp.keep=-1;
-	if (_keep&&aligned) outstream.write(tmp);
-}
-
 
 
 void write_axi256_one(hls::stream<iqout_t> &filtered, capcount_t capturesize, uint256_t *out) {
