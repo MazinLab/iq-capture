@@ -42,21 +42,25 @@ void _pair(uint128_t iin, uint128_t qin, uint256_t &iq){
 }
 
 void pair_iq(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in, hls::stream<iqout_t> &out) {
+#pragma HLS PIPELINE II=1 REWIND
 #pragma HLS INTERFACE mode=axis port=i_in register_mode=off //register
 #pragma HLS INTERFACE mode=axis port=q_in register_mode=off //register
 #pragma HLS INTERFACE mode=axis port=out register_mode=off //register
 #pragma HLS INTERFACE mode=ap_ctrl_none port=return
 
-	iqout_t tmp;
-	static unsigned char group=0;
+	static ap_uint<8> group=0;
+//	while (true) {
+//#pragma HLS PIPELINE II=1
+		iqout_t tmp;
 
-	_pair(i_in.read(), q_in.read(), tmp.data);
+		_pair(i_in.read(), q_in.read(), tmp.data);
 
-	tmp.last=group==255;
-	tmp.user=group;
-	tmp.keep=-1;
-	group++;
-	out.write(tmp);
+		tmp.last=group==255;
+		tmp.user=group;
+		tmp.keep=-1;
+		group++;
+		out.write(tmp);
+//	}
 }
 
 void pair_iq512(hls::stream<uint128_t> &i_in, hls::stream<uint128_t> &q_in, hls::stream<out512_t> &out) {
