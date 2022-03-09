@@ -74,70 +74,6 @@ phasestream_t phase_for_sample(int i) {
 	return d;
 }
 
-bool drive_writeaxi256() {
-
-	ap_uint<256> out[OUT_BUF_SIZE];
-
-	for (int i=0; i<OUT_BUF_SIZE;i++)
-		out[i]=0;
-	hls::stream<iqout_t> streamin("input");
-	uint256_t keep;
-	bool fail=false;
-	int offset=13; //the group the core gets at start (test sync logic)
-	int capturesize=128*14;  //only multiples of 128  allowed
-	for (int i=0;i<N_GROUPS; i++)
-		keep[i]=i%2;	// every other tuser
-	int nkeep = bitsum(keep);
-	int lastuser = lastbit(keep);
-    int total_size=256*capturesize/nkeep+(256-offset)+256;  //send a fullcycle and then some
-	bool aligned=true;
-
-	cout<<"Will process "<<total_size<<" samples.\n";
-	if (nkeep<2) {
-		cout<<"nkeep must set at least two samples"<<endl;
-		return false;
-	}
-	for (int j=0;j<total_size; j++) {
-		resstream_t x;
-
-		iqout_t in;
-		x=iq_for_sample(j+offset);
-		in.data=x.data;
-		in.last=x.user==lastuser;
-		if (keep[x.user]) streamin.write(in);
-	}
-	cout<<"Will send "<<streamin.size()<<" samples to capture "<<capturesize<<" samples "<<endl;
-	if (streamin.size()>OUT_BUF_SIZE) {
-		cout<<"More than "<<OUT_BUF_SIZE<<" samples needs a bigger buffer"<<endl;
-		return false;
-	}
-
-	write_axi256(streamin, capturesize, out);
-
-	int captured=0;
-	for (int j=0;j<total_size;j++) {
-		resstream_t d = iq_for_sample(j+offset);
-		if (keep[d.user] && aligned && (captured<capturesize) ){
-			if (out[captured++]!=d.data) {
-				cout<<"Expected value "<<out[captured-1]<<" to be "<<d.data<<endl;
-				fail=true;
-			}
-		} else if (!aligned) {
-			cout<<"Skipping filtered sample "<<j<<" with user="<<d.user<<endl;
-		}
-		aligned |= d.last;
-	}
-	for (int j=captured;j<OUT_BUF_SIZE;j++) {
-		if (out[j]!=0) {
-			cout<<"too much output"<<endl;
-			fail=true;
-		}
-	}
-
-	return fail;
-}
-
-
 bool drive_filteriq() {
 
 
@@ -193,7 +129,7 @@ bool drive_filteriq() {
 }
 
 
-bool drive_filterphase256() {
+bool drive_filterphase() {
 
 
 //	void filter_phase(hls::stream<phasestream_t> &instream, hls::stream<out256_t> &filtered, pkeep256_t keep, pgroup256_t lastgrp);
@@ -257,47 +193,53 @@ bool drive_filterphase256() {
 
 
 
-//
-//bool drive_adc(unsigned int samples, uint256_t out[],  capcount_t capturesize) {
-//
-//	hls::stream<uint128_t> istream, qstream;
-//	bool fail=false;
-//
-//	for (int i=0; i<OUT_BUF_SIZE;i++) out[i]=0;
-//	for (int i=0;i<samples;i++){
-//		istream.write(i);
-//		qstream.write(samples-i);
-//	}
-//
-//	adc_capture(istream, qstream, capturesize, out);
-//
-//	int captured=0;
-//	for (int i=0;i<samples;i++) {
-//		if (captured<capturesize) {
-//
-//			uint256_t tmp;
-//			uint128_t ival=i,qval=samples-i;
-//			bundle: for (int i=0;i<N_IQ;i++){
-//				tmp.range(32*(i+1)-1-16, 32*i)=ival.range(16*(i+1)-1, 16*i);
-//				tmp.range(32*(i+1)-1, 32*i+16)=qval.range(16*(i+1)-1, 16*i);
-//			}
-//
-//			if (out[captured]!=tmp){
-//				cout<<"Expect value "<<out[captured]<<" to be "<<tmp<<" (cycle="<<i<<")"<<endl;
-//				fail|=out[captured]!=i;
-//			} else {cout<<"OK "<<out[captured]<<" (cycle="<<i<<")"<<endl;}
-//			captured++;
-//		} else {
-//			//cout<<"Expect value "<<out[captured]<<" to be "<<i<<endl;
-//			if (captured==capturesize) break;
-//		}
-//	}
-//
-//	//Rest better still be zero
-//	while (captured<OUT_BUF_SIZE) fail|=out[captured++]!=0;
-//
-//	return fail;
-//}
+
+bool drive_pairiq() {
+
+	hls::stream<uint128_t> istream, qstream;
+	hls::stream<iqout_t> out;
+	bool fail=false;
+	int samples=513;
+
+	for (int i=0;i<samples;i++){
+		istream.write(i);
+		qstream.write(samples-i);
+	}
+
+	for (int i=0;i<samples;i++) pair_iq(istream, qstream, out);
+
+	for (int i=0;i<samples;i++) {
+
+			iqout_t tmp, got;
+			uint128_t ival=i,qval=samples-i;
+			bundle: for (int i=0;i<N_IQ;i++){
+				tmp.data.range(32*(i+1)-1-16, 32*i)=ival.range(16*(i+1)-1, 16*i);
+				tmp.data.range(32*(i+1)-1, 32*i+16)=qval.range(16*(i+1)-1, 16*i);
+			}
+			tmp.last=i%256 == 255;
+			if (out.empty()) {
+				cout<<"didn't get output"<<endl;
+				fail|=true;
+				break;
+			}
+			got=out.read();
+			if (tmp.last!= got.last) {
+				cout<<"last mismatch"<<endl;
+				fail|=true;
+			}
+			if (got.data!=tmp.data){
+				cout<<"Expect value "<<got.data<<" to be "<<tmp.data<<" (cycle="<<i<<")"<<endl;
+				fail|=true;
+			}
+	}
+	if (!out.empty()) {
+		cout<<"got too much output"<<endl;
+		fail|=true;
+	}
+
+	return fail;
+}
+
 
 int main (void){
 
@@ -305,10 +247,9 @@ int main (void){
 
 
 
-//	fail|=drive_filteriq();
-	fail|=drive_filterphase256();
-//	fail|=drive_writeaxi256();
-	//fail|=drive_adc(1500, out, 1398);
+	fail|=drive_filteriq();
+	fail|=drive_filterphase();
+	fail|=drive_pairiq();
 
 	if (fail) {
 		std::cout << "Test failed" << std::endl;
